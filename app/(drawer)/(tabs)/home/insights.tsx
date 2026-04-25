@@ -1,13 +1,44 @@
-import { AppCard } from "@/components/AppCard";
+import { InsightCard } from "@/components/InsightCard";
 import { ScreenContainer } from "@/components/ScreenContainer";
 import { colors, fontSize, fontWeight, spacing } from "@/constants/design";
+import { useAuth } from "@/context/AuthContext";
+import { getUserInsights } from "@/services/insightsService";
+import { FinancialInsight } from "@/types/insights";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function InsightsScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const [insights, setInsights] = useState<FinancialInsight[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadInsights();
+    }
+  }, [user?.id]);
+
+  const loadInsights = async () => {
+    try {
+      setLoading(true);
+      // En un caso real, esto obtendría múltiples insights del API
+      const data = await getUserInsights(user?.id ?? "");
+      setInsights(data);
+    } catch (error) {
+      console.error("Error cargando insights:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.root}>
@@ -15,31 +46,55 @@ export default function InsightsScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8}>
           <Ionicons name="arrow-back" size={24} color={colors.foreground} />
         </Pressable>
-        <Text style={styles.title}>Insights LLM</Text>
+        <Text style={styles.title}>Insights Personalizados</Text>
         <View style={{ width: 24 }} />
       </View>
+
       <ScreenContainer scrollable padded>
-        <AppCard style={styles.card}>
-          <Text style={styles.cardTitle}>Análisis de gastos</Text>
-          <Text style={styles.cardBody}>
-            Basado en tus movimientos recientes, el modelo detecta un patrón de
-            gasto elevado en entretenimiento durante fines de semana.
-          </Text>
-        </AppCard>
-        <AppCard style={styles.card}>
-          <Text style={styles.cardTitle}>Oportunidad de ahorro</Text>
-          <Text style={styles.cardBody}>
-            Si reduces un 15% en gastos no esenciales durante este mes, podrías
-            ahorrar aproximadamente $2,400.
-          </Text>
-        </AppCard>
-        <AppCard style={styles.card}>
-          <Text style={styles.cardTitle}>Proyección a 3 meses</Text>
-          <Text style={styles.cardBody}>
-            Con los hábitos actuales, tu balance proyectado en 90 días es
-            positivo pero con un margen ajustado.
-          </Text>
-        </AppCard>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.foreground} />
+            <Text style={styles.loadingText}>
+              Analizando tu perfil financiero...
+            </Text>
+          </View>
+        ) : insights.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="analytics-outline" size={64} color={colors.muted} />
+            <Text style={styles.emptyTitle}>Sin insights disponibles</Text>
+            <Text style={styles.emptyText}>
+              Tus insights personalizados aparecerán aquí cuando tengamos
+              suficiente información sobre tu actividad financiera.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <Text style={styles.subtitle}>
+              Recomendaciones basadas en tu perfil:{" "}
+              <Text style={styles.segmentHighlight}>
+                {insights[0].segment_name}
+              </Text>
+            </Text>
+
+            {insights.map((insight, index) => (
+              <View key={index} style={styles.insightWrapper}>
+                <InsightCard insight={insight} />
+              </View>
+            ))}
+
+            <View style={styles.infoBox}>
+              <Ionicons
+                name="information-circle-outline"
+                size={20}
+                color={colors.muted}
+              />
+              <Text style={styles.infoText}>
+                Estos insights se generan usando inteligencia artificial y se
+                actualizan semanalmente según tu actividad financiera.
+              </Text>
+            </View>
+          </>
+        )}
       </ScreenContainer>
     </View>
   );
@@ -65,16 +120,63 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
     color: colors.foreground,
   },
-  card: {
+  subtitle: {
+    fontSize: fontSize.md,
+    color: colors.muted,
+    marginBottom: spacing.lg,
+    lineHeight: 22,
+  },
+  segmentHighlight: {
+    fontWeight: fontWeight.bold,
+    color: colors.foreground,
+  },
+  insightWrapper: {
     marginBottom: spacing.md,
   },
-  cardTitle: {
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.semibold,
-    color: colors.foreground,
-    marginBottom: spacing.sm,
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing.xxl * 2,
   },
-  cardBody: {
+  loadingText: {
+    fontSize: fontSize.md,
+    color: colors.muted,
+    marginTop: spacing.lg,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing.xxl * 2,
+    paddingHorizontal: spacing.xl,
+  },
+  emptyTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.foreground,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+    textAlign: "center",
+  },
+  emptyText: {
+    fontSize: fontSize.md,
+    color: colors.muted,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  infoBox: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    backgroundColor: colors.inputBackground,
+    padding: spacing.md,
+    borderRadius: 12,
+    marginTop: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  infoText: {
+    flex: 1,
     fontSize: fontSize.sm,
     color: colors.muted,
     lineHeight: 20,

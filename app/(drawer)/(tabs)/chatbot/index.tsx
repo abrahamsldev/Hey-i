@@ -10,11 +10,36 @@ import { FlatList, StyleSheet, Text, View } from "react-native";
 
 type Message = ChatMessage & { id: string; loading?: boolean };
 
+/**
+ * Extrae el texto de una respuesta que puede ser string u objeto complejo
+ */
+function extractTextFromReply(reply: any): string {
+  if (typeof reply === "string") {
+    return reply;
+  }
+
+  // Si es un objeto con propiedad text
+  if (reply && typeof reply === "object") {
+    if ("text" in reply && typeof reply.text === "string") {
+      return reply.text;
+    }
+    // Si es un array de objetos con text
+    if (Array.isArray(reply)) {
+      return reply
+        .map((item) => (typeof item === "string" ? item : item.text || ""))
+        .filter(Boolean)
+        .join("\n");
+    }
+  }
+
+  // Fallback: convertir a JSON
+  return JSON.stringify(reply);
+}
+
 export default function ChatbotScreen() {
-  const { user } = useAuth();
+  const { session } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
 
   const sendMessage = useCallback(
@@ -41,17 +66,20 @@ export default function ChatbotScreen() {
       );
 
       try {
+        if (!session?.access_token) {
+          throw new Error("No estás autenticado");
+        }
+
         const res = await sendChatMessage({
           message: text,
-          userId: user?.id ?? null,
-          conversationId,
+          accessToken: session.access_token,
         });
 
-        if (res.conversationId) setConversationId(res.conversationId);
+        const replyText = extractTextFromReply(res.reply);
 
         setMessages((prev) => [
           ...prev.filter((m) => m.id !== "loading"),
-          { id: Date.now().toString(), role: "assistant", content: res.reply },
+          { id: Date.now().toString(), role: "assistant", content: replyText },
         ]);
       } catch (err) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -68,7 +96,7 @@ export default function ChatbotScreen() {
         setLoading(false);
       }
     },
-    [user, conversationId],
+    [session],
   );
 
   return (

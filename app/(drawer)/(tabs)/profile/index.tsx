@@ -3,13 +3,9 @@ import { AppCard } from "@/components/AppCard";
 import { AppHeader } from "@/components/AppHeader";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { ScreenContainer } from "@/components/ScreenContainer";
-import {
-    colors,
-    fontSize,
-    fontWeight,
-    spacing
-} from "@/constants/design";
+import { colors, fontSize, fontWeight, spacing } from "@/constants/design";
 import { useAuth } from "@/context/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -35,6 +31,7 @@ const SettingRow = ({
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { profile, loading: profileLoading, hasProfile } = useUserProfile();
 
   const name =
     user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "Usuario";
@@ -64,8 +61,60 @@ export default function ProfileScreen() {
           <View style={styles.nameBlock}>
             <Text style={styles.name}>{name}</Text>
             <Text style={styles.email}>{email}</Text>
+            {profile?.es_hey_pro && (
+              <View style={styles.proBadge}>
+                <Ionicons name="star" size={12} color="#FFD700" />
+                <Text style={styles.proText}>Hey Pro</Text>
+              </View>
+            )}
           </View>
         </View>
+
+        {hasProfile && profile && (
+          <>
+            <Text style={styles.sectionTitle}>Información Personal</Text>
+            <AppCard style={styles.infoCard} animateIn>
+              {profile.edad && (
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Edad</Text>
+                  <Text style={styles.infoValue}>{profile.edad} años</Text>
+                </View>
+              )}
+              {profile.ciudad && (
+                <>
+                  <View style={styles.divider} />
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Ubicación</Text>
+                    <Text style={styles.infoValue}>
+                      {profile.ciudad}
+                      {profile.estado && `, ${profile.estado}`}
+                    </Text>
+                  </View>
+                </>
+              )}
+              {profile.ocupacion && (
+                <>
+                  <View style={styles.divider} />
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Ocupación</Text>
+                    <Text style={styles.infoValue}>{profile.ocupacion}</Text>
+                  </View>
+                </>
+              )}
+              {profile.num_productos_activos > 0 && (
+                <>
+                  <View style={styles.divider} />
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Productos activos</Text>
+                    <Text style={styles.infoValue}>
+                      {profile.num_productos_activos}
+                    </Text>
+                  </View>
+                </>
+              )}
+            </AppCard>
+          </>
+        )}
 
         <Text style={styles.sectionTitle}>Configuración</Text>
         <AppCard style={styles.settingsCard} animateIn>
@@ -123,6 +172,43 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.muted,
     marginTop: 2,
+  },
+  proBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: spacing.xs,
+    backgroundColor: "rgba(255, 215, 0, 0.1)",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: 12,
+    alignSelf: "flex-start",
+  },
+  proText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+    color: "#FFD700",
+  },
+  infoCard: {
+    padding: 0,
+    overflow: "hidden",
+    marginBottom: spacing.lg,
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  infoLabel: {
+    fontSize: fontSize.md,
+    color: colors.muted,
+  },
+  infoValue: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    color: colors.foreground,
   },
   sectionTitle: {
     fontSize: fontSize.sm,

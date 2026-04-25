@@ -1,12 +1,15 @@
 import { AppCard } from "@/components/AppCard";
 import { AppHeader } from "@/components/AppHeader";
+import { InsightCard } from "@/components/InsightCard";
 import { ScreenContainer } from "@/components/ScreenContainer";
 import { colors, fontSize, fontWeight, spacing } from "@/constants/design";
 import { useAuth } from "@/context/AuthContext";
+import { getPrimaryInsight } from "@/services/insightsService";
+import { FinancialInsight } from "@/types/insights";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const CARDS = [
@@ -37,9 +40,31 @@ export default function HomeScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { user } = useAuth();
+  const [primaryInsight, setPrimaryInsight] = useState<FinancialInsight | null>(
+    null,
+  );
+  const [loadingInsight, setLoadingInsight] = useState(true);
 
   const displayName =
     user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "usuario";
+
+  useEffect(() => {
+    if (user?.id) {
+      loadInsight();
+    }
+  }, [user?.id]);
+
+  const loadInsight = async () => {
+    try {
+      setLoadingInsight(true);
+      const insight = await getPrimaryInsight(user?.id ?? "");
+      setPrimaryInsight(insight);
+    } catch (error) {
+      console.error("Error cargando insight:", error);
+    } finally {
+      setLoadingInsight(false);
+    }
+  };
 
   const openDrawer = () => {
     navigation.dispatch(DrawerActions.openDrawer());
@@ -57,8 +82,22 @@ export default function HomeScreen() {
         }
       />
       <ScreenContainer scrollable padded={false} style={styles.content}>
+        {/* Insight Principal */}
+        {!loadingInsight && primaryInsight && (
+          <View style={styles.insightSection}>
+            <Text style={styles.sectionTitle}>Tu insight del día</Text>
+            <InsightCard
+              insight={primaryInsight}
+              compact
+              onPress={() => router.push("/(drawer)/(tabs)/home/insights")}
+            />
+          </View>
+        )}
+
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tu resumen</Text>
+          <Text style={styles.sectionTitle}>
+            {primaryInsight ? "Explorar más" : "Tu resumen"}
+          </Text>
           {CARDS.map((card, index) => (
             <AppCard
               key={card.id}
@@ -99,8 +138,11 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
   },
+  insightSection: {
+    marginBottom: spacing.lg,
+  },
   section: {
-    paddingTop: spacing.lg,
+    paddingTop: spacing.sm,
   },
   sectionTitle: {
     fontSize: fontSize.lg,

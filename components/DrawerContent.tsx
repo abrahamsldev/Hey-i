@@ -19,7 +19,7 @@ export function DrawerContent(props: any) {
 
   const handleHome = () => {
     Haptics.selectionAsync();
-    router.push("/(drawer)/(tabs)/home");
+    props.navigation?.navigate("(tabs)");
     props.navigation?.closeDrawer?.();
   };
 

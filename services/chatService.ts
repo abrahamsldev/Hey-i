@@ -1,4 +1,6 @@
-const LAMBDA_BASE_URL = process.env.EXPO_PUBLIC_LAMBDA_API_URL ?? "";
+const LAMBDA_BASE_URL =
+  process.env.EXPO_PUBLIC_LAMBDA_API_URL ??
+  "https://qlo69njeb0.execute-api.us-east-2.amazonaws.com";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -7,13 +9,11 @@ export interface ChatMessage {
 
 export interface ChatRequest {
   message: string;
-  userId: string | null;
-  conversationId: string | null;
+  accessToken: string;
 }
 
 export interface ChatResponse {
   reply: string;
-  conversationId?: string;
 }
 
 export async function sendChatMessage(
@@ -25,12 +25,18 @@ export async function sendChatMessage(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${payload.accessToken}`,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      message: payload.message,
+    }),
   });
 
   if (!response.ok) {
-    throw new Error(`Error del servidor: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || `Error del servidor: ${response.status}`,
+    );
   }
 
   return response.json();
