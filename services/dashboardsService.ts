@@ -1,637 +1,76 @@
-import { Dashboard, DashboardResponse } from "@/types/dashboards";
+import { Dashboard } from "@/types/dashboards";
 
-const spendingDashboardResponse: DashboardResponse = {
-  structuredContent: {
-    ok: true,
-    dashboard: "spending_dashboard",
-    user_id: "11111111-1111-1111-1111-111111111111",
-    generated_at: "2026-04-26T06:29:25.066060+00:00",
-    charts: [
-      {
-        id: "spending_category_donut",
-        type: "donut",
-        title: "Gasto por categoría este mes",
-        subtitle: "Sólo incluye transacciones completadas de salida.",
-        available: true,
-        unit: "MXN",
-        value_format: {
-          kind: "currency",
-          currency: "MXN",
-          decimals: 2,
-        },
-        series: [
-          {
-            name: "Gasto",
-            data: [
-              {
-                label: "tecnologia",
-                value: 8900,
-                count: 1,
-                share_pct: 49.04,
-              },
-              {
-                label: "viajes",
-                value: 7400,
-                count: 2,
-                share_pct: 40.77,
-              },
-              {
-                label: "restaurante",
-                value: 1850,
-                count: 1,
-                share_pct: 10.19,
-              },
-            ],
-          },
-        ],
-        summary: {
-          total_mxn: 18150,
-          category_count: 3,
-          top_category: "tecnologia",
-        },
-        meta: {
-          period: {
-            start: "2026-04-01T00:00:00+00:00",
-            end: "2026-05-01T00:00:00+00:00",
-            label: "current_month",
-          },
-        },
-        notes: ["Las categorías vacías se omiten."],
-      },
-      {
-        id: "spending_category_month_comparison",
-        type: "bar",
-        title: "Este mes vs mes anterior por categoría",
-        subtitle: "Barras agrupadas con gasto completado por categoría.",
-        available: true,
-        unit: "MXN",
-        value_format: {
-          kind: "currency",
-          currency: "MXN",
-          decimals: 2,
-        },
-        series: [
-          {
-            name: "Este mes",
-            data: [
-              { label: "tecnologia", value: 8900 },
-              { label: "viajes", value: 7400 },
-              { label: "restaurante", value: 1850 },
-            ],
-          },
-          {
-            name: "Mes anterior",
-            data: [
-              { label: "tecnologia", value: 0 },
-              { label: "viajes", value: 0 },
-              { label: "restaurante", value: 0 },
-            ],
-          },
-        ],
-        categories: ["tecnologia", "viajes", "restaurante"],
-        orientation: "vertical",
-        summary: {
-          current_month_total_mxn: 18150,
-          previous_month_total_mxn: 0,
-          delta_mxn: 18150,
-          delta_pct: null,
-        },
-        meta: {
-          period: {
-            current_month_start: "2026-04-01T00:00:00+00:00",
-            previous_month_start: "2026-03-01T00:00:00+00:00",
-          },
-        },
-      },
-      {
-        id: "spending_daily_last_30_days",
-        type: "line",
-        title: "Gasto diario en los últimos 30 días",
-        subtitle: "Serie diaria con ceros explícitos para días sin gasto.",
-        available: true,
-        unit: "MXN",
-        value_format: {
-          kind: "currency",
-          currency: "MXN",
-          decimals: 2,
-        },
-        series: [
-          {
-            name: "Gasto diario",
-            data: [
-              { x: "2026-03-28", y: 0 },
-              { x: "2026-03-29", y: 0 },
-              { x: "2026-03-30", y: 0 },
-              { x: "2026-03-31", y: 0 },
-              { x: "2026-04-01", y: 0 },
-              { x: "2026-04-02", y: 0 },
-              { x: "2026-04-03", y: 0 },
-              { x: "2026-04-04", y: 0 },
-              { x: "2026-04-05", y: 0 },
-              { x: "2026-04-06", y: 0 },
-              { x: "2026-04-07", y: 0 },
-              { x: "2026-04-08", y: 0 },
-              { x: "2026-04-09", y: 0 },
-              { x: "2026-04-10", y: 0 },
-              { x: "2026-04-11", y: 0 },
-              { x: "2026-04-12", y: 0 },
-              { x: "2026-04-13", y: 0 },
-              { x: "2026-04-14", y: 0 },
-              { x: "2026-04-15", y: 0 },
-              { x: "2026-04-16", y: 3200 },
-              { x: "2026-04-17", y: 0 },
-              { x: "2026-04-18", y: 0 },
-              { x: "2026-04-19", y: 1850 },
-              { x: "2026-04-20", y: 0 },
-              { x: "2026-04-21", y: 8900 },
-              { x: "2026-04-22", y: 0 },
-              { x: "2026-04-23", y: 0 },
-              { x: "2026-04-24", y: 0 },
-              { x: "2026-04-25", y: 4200 },
-              { x: "2026-04-26", y: 0 },
-            ],
-          },
-        ],
-        summary: {
-          total_mxn: 18150,
-          average_daily_mxn: 605,
-          days: 30,
-        },
-        meta: {
-          period: {
-            start: "2026-03-28",
-            end: "2026-04-26",
-            window_days: 30,
-          },
-        },
-      },
-      {
-        id: "spending_heatmap_weekday_hour",
-        type: "heatmap",
-        title: "Heatmap de gasto por día de semana y hora",
-        subtitle:
-          "Las coordenadas día/hora se derivan de fecha_hora porque la tabla no las expone directamente.",
-        available: true,
-        unit: "MXN",
-        value_format: {
-          kind: "currency",
-          currency: "MXN",
-          decimals: 2,
-        },
-        points: [
-          { day_of_week: "lunes", day_index: 0, hour: 0, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 1, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 2, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 3, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 4, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 5, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 6, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 7, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 8, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 9, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 10, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 11, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 12, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 13, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 14, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 15, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 16, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 17, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 18, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 19, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 20, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 21, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 22, value: 0 },
-          { day_of_week: "lunes", day_index: 0, hour: 23, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 0, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 1, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 2, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 3, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 4, value: 8900 },
-          { day_of_week: "martes", day_index: 1, hour: 5, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 6, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 7, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 8, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 9, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 10, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 11, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 12, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 13, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 14, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 15, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 16, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 17, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 18, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 19, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 20, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 21, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 22, value: 0 },
-          { day_of_week: "martes", day_index: 1, hour: 23, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 0, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 1, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 2, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 3, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 4, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 5, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 6, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 7, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 8, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 9, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 10, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 11, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 12, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 13, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 14, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 15, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 16, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 17, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 18, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 19, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 20, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 21, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 22, value: 0 },
-          { day_of_week: "miércoles", day_index: 2, hour: 23, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 0, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 1, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 2, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 3, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 4, value: 3200 },
-          { day_of_week: "jueves", day_index: 3, hour: 5, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 6, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 7, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 8, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 9, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 10, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 11, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 12, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 13, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 14, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 15, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 16, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 17, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 18, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 19, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 20, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 21, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 22, value: 0 },
-          { day_of_week: "jueves", day_index: 3, hour: 23, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 0, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 1, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 2, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 3, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 4, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 5, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 6, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 7, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 8, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 9, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 10, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 11, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 12, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 13, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 14, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 15, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 16, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 17, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 18, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 19, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 20, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 21, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 22, value: 0 },
-          { day_of_week: "viernes", day_index: 4, hour: 23, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 0, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 1, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 2, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 3, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 4, value: 4200 },
-          { day_of_week: "sábado", day_index: 5, hour: 5, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 6, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 7, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 8, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 9, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 10, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 11, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 12, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 13, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 14, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 15, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 16, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 17, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 18, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 19, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 20, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 21, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 22, value: 0 },
-          { day_of_week: "sábado", day_index: 5, hour: 23, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 0, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 1, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 2, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 3, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 4, value: 1850 },
-          { day_of_week: "domingo", day_index: 6, hour: 5, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 6, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 7, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 8, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 9, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 10, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 11, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 12, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 13, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 14, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 15, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 16, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 17, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 18, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 19, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 20, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 21, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 22, value: 0 },
-          { day_of_week: "domingo", day_index: 6, hour: 23, value: 0 },
-        ],
-        summary: {
-          peak_day: "martes",
-          peak_hour: 4,
-          peak_value: 8900,
-        },
-        meta: {
-          derived_fields: ["dia_semana", "hora_del_dia"],
-          source_field: "fecha_hora",
-          window: { start: "2026-03-28", end: "2026-04-26" },
-        },
-      },
-      {
-        id: "spending_top_merchants",
-        type: "bar",
-        title: "Top 5 comercios donde más gastas",
-        subtitle: "Ranking de gasto completado en el mes actual.",
-        available: true,
-        unit: "MXN",
-        value_format: {
-          kind: "currency",
-          currency: "MXN",
-          decimals: 2,
-        },
-        series: [
-          {
-            name: "Gasto",
-            data: [
-              {
-                label: "Apple Store",
-                value: 8900,
-                count: 1,
-                average_ticket_mxn: 8900,
-              },
-              {
-                label: "Aeroméxico",
-                value: 4200,
-                count: 1,
-                average_ticket_mxn: 4200,
-              },
-              {
-                label: "Marriott Hotels",
-                value: 3200,
-                count: 1,
-                average_ticket_mxn: 3200,
-              },
-              {
-                label: "Pangea Restaurant",
-                value: 1850,
-                count: 1,
-                average_ticket_mxn: 1850,
-              },
-            ],
-          },
-        ],
-        orientation: "horizontal",
-        summary: {
-          merchant_count: 4,
-          top_merchant: "Apple Store",
-          top_merchant_mxn: 8900,
-        },
-        notes: ["Sólo se cuentan transacciones completadas de salida."],
-      },
-    ],
-    summary: {
-      current_month_spend_mxn: 18150,
-      previous_month_spend_mxn: 0,
-      delta_mxn: 18150,
-      category_count: 3,
-      merchant_count: 4,
-      spend_transaction_count: 4,
-    },
-    warnings: [],
-    errors: [],
-    meta: {
-      source_table: "user_transactions",
-      filters: { user_id: "11111111-1111-1111-1111-111111111111" },
-    },
-  },
-  isError: false,
-};
+const LAMBDA_BASE_URL =
+  process.env.EXPO_PUBLIC_LAMBDA_API_URL ??
+  "https://qlo69njeb0.execute-api.us-east-2.amazonaws.com";
 
-const savingsDashboardResponse: DashboardResponse = {
-  structuredContent: {
-    ok: true,
-    dashboard: "savings_dashboard",
-    user_id: "11111111-1111-1111-1111-111111111111",
-    generated_at: "2026-04-26T06:33:59.724910+00:00",
-    charts: [
-      {
-        id: "savings_investment_growth",
-        type: "line",
-        title: "Crecimiento acumulado de inversión",
-        subtitle:
-          "Suma de abonos de inversión registrados dentro del periodo seleccionado.",
-        available: true,
-        unit: "MXN",
-        value_format: {
-          kind: "currency",
-          currency: "MXN",
-          decimals: 2,
-        },
-        series: [
-          {
-            name: "Inversión acumulada",
-            data: [
-              { x: "2025-11", y: 0 },
-              { x: "2025-12", y: 0 },
-              { x: "2026-01", y: 0 },
-              { x: "2026-02", y: 0 },
-              { x: "2026-03", y: 0 },
-              { x: "2026-04", y: 10000 },
-            ],
-          },
-        ],
-        summary: {
-          final_cumulative_mxn: 10000,
-          investment_tx_count: 1,
-        },
-        meta: {
-          period: {
-            months_back: 6,
-            months: [
-              "2025-11",
-              "2025-12",
-              "2026-01",
-              "2026-02",
-              "2026-03",
-              "2026-04",
-            ],
-          },
-        },
-        notes: [
-          "Este chart mide aportes acumulados, no valuación de portafolio.",
-        ],
-      },
-      {
-        id: "savings_income_vs_spend",
-        type: "bar",
-        title: "Ingreso vs gasto mensual",
-        subtitle: "Comparativa mensual con ingreso estimado y gasto completado.",
-        available: true,
-        unit: "MXN",
-        value_format: {
-          kind: "currency",
-          currency: "MXN",
-          decimals: 2,
-        },
-        series: [
-          {
-            name: "Ingreso estimado",
-            data: [
-              { x: "2025-11", y: 85000 },
-              { x: "2025-12", y: 85000 },
-              { x: "2026-01", y: 85000 },
-              { x: "2026-02", y: 85000 },
-              { x: "2026-03", y: 85000 },
-              { x: "2026-04", y: 85000 },
-            ],
-          },
-          {
-            name: "Gasto",
-            data: [
-              { x: "2025-11", y: 0 },
-              { x: "2025-12", y: 0 },
-              { x: "2026-01", y: 0 },
-              { x: "2026-02", y: 0 },
-              { x: "2026-03", y: 0 },
-              { x: "2026-04", y: 18150 },
-            ],
-          },
-          {
-            name: "Sobra / falta",
-            data: [
-              { x: "2025-11", y: 85000 },
-              { x: "2025-12", y: 85000 },
-              { x: "2026-01", y: 85000 },
-              { x: "2026-02", y: 85000 },
-              { x: "2026-03", y: 85000 },
-              { x: "2026-04", y: 66850 },
-            ],
-          },
-        ],
-        categories: [
-          "2025-11",
-          "2025-12",
-          "2026-01",
-          "2026-02",
-          "2026-03",
-          "2026-04",
-        ],
-        summary: {
-          income_source: "user_profiles.ingreso_mensual_mxn",
-          latest_month_income_mxn: 85000,
-          latest_month_spend_mxn: 18150,
-          latest_month_net_mxn: 66850,
-        },
-        meta: {
-          period: {
-            months_back: 6,
-            months: [
-              "2025-11",
-              "2025-12",
-              "2026-01",
-              "2026-02",
-              "2026-03",
-              "2026-04",
-            ],
-          },
-        },
-      },
-      {
-        id: "savings_projection",
-        type: "bar",
-        title: "Proyección de ahorro por categoría",
-        subtitle: "Escenario: reducir 10% en tecnología.",
-        available: true,
-        unit: "MXN",
-        value_format: {
-          kind: "currency",
-          currency: "MXN",
-          decimals: 2,
-        },
-        series: [
-          {
-            name: "Gasto actual",
-            data: [{ label: "tecnologia", value: 8900 }],
-          },
-          {
-            name: "Gasto proyectado",
-            data: [{ label: "tecnologia", value: 8010 }],
-          },
-          {
-            name: "Ahorro potencial",
-            data: [{ label: "tecnologia", value: 890 }],
-          },
-        ],
-        categories: ["tecnologia"],
-        orientation: "horizontal",
-        summary: {
-          category: "tecnologia",
-          current_month_spend_mxn: 8900,
-          reduction_pct: 10,
-          projected_savings_mxn: 890,
-          projected_spend_mxn: 8010,
-          projected_yearly_savings_mxn: 10680,
-        },
-        meta: {
-          period: { months_back: 6, current_month: "2026-04" },
-        },
-      },
-    ],
-    summary: {
-      investment_final_cumulative_mxn: 10000,
-      latest_month_income_mxn: 85000,
-      latest_month_spend_mxn: 18150,
-      latest_month_net_mxn: 66850,
-      projection_category: "tecnologia",
-      projected_savings_mxn: 890,
-    },
-    warnings: [],
-    errors: [],
-    meta: {
-      source_tables: ["user_profiles", "user_transactions"],
-      months_back: 6,
-    },
-  },
-  isError: false,
-};
+// 🔹 helper genérico (igual patrón que chat)
+async function fetchFromLambda<T>(
+  endpoint: string,
+  accessToken: string,
+): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
 
-export async function getSpendingDashboard(): Promise<Dashboard> {
-  return spendingDashboardResponse.structuredContent;
+  try {
+    const response = await fetch(`${LAMBDA_BASE_URL}${endpoint}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `Error del servidor: ${response.status}`,
+      );
+    }
+
+    return response.json();
+  } catch (err: any) {
+    if (err.name === "AbortError") {
+      throw new Error("La solicitud tardó demasiado. Inténtalo de nuevo.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
-export async function getSavingsDashboard(): Promise<Dashboard> {
-  return savingsDashboardResponse.structuredContent;
+export async function getSpendingDashboard(
+  accessToken: string,
+): Promise<Dashboard> {
+  const data = await fetchFromLambda<any>(
+    "/get_spending_dashboard",
+    accessToken,
+  );
+
+  return data.structuredContent;
 }
 
-export async function getDashboards(): Promise<{
+export async function getSavingsDashboard(
+  accessToken: string,
+): Promise<Dashboard> {
+  const data = await fetchFromLambda<any>(
+    "/get_savings_dashboard",
+    accessToken,
+  );
+
+  return data.structuredContent;
+}
+
+export async function getDashboards(
+  accessToken: string,
+): Promise<{
   spending: Dashboard;
   savings: Dashboard;
 }> {
   const [spending, savings] = await Promise.all([
-    getSpendingDashboard(),
-    getSavingsDashboard(),
+    getSpendingDashboard(accessToken),
+    getSavingsDashboard(accessToken),
   ]);
 
   return { spending, savings };

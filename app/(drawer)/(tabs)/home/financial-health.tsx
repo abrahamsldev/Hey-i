@@ -13,23 +13,15 @@ import {
 
 import { getDashboards, formatCurrency } from "@/services/dashboardsService";
 import { Dashboard } from "@/types/dashboards";
+import { useAuth } from "@/context/AuthContext";
 
-const METRICS = [
-  {
-    label: "Ingresos mensuales",
-    value: "$18,500",
-    icon: "trending-up-outline",
-  },
-  { label: "Gastos totales", value: "$12,300", icon: "trending-down-outline" },
-  { label: "Ahorro neto", value: "$6,200", icon: "wallet-outline" },
-  { label: "Deuda activa", value: "$0", icon: "shield-checkmark-outline" },
-];
 
 export default function FinancialHealthScreen() {
   const router = useRouter();
   const [spendingDashboard, setSpendingDashboard] = useState<Dashboard | null>(null);
   const [savingsDashboard, setSavingsDashboard] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     loadDashboards();
@@ -38,7 +30,7 @@ export default function FinancialHealthScreen() {
   const loadDashboards = async () => {
     try {
       setLoading(true);
-      const { spending, savings } = await getDashboards();
+      const { spending, savings } = await getDashboards(user?.id ?? "");
       setSpendingDashboard(spending);
       setSavingsDashboard(savings);
     } catch (e) {

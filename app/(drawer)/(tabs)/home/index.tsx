@@ -75,7 +75,7 @@ export default function HomeScreen() {
   const loadDashboards = async () => {
     try {
       setLoadingDashboards(true);
-      const { spending, savings } = await getDashboards();
+      const { spending, savings } = await getDashboards(user?.id ?? "");
       setSpendingDashboard(spending);
       setSavingsDashboard(savings);
     } catch (error) {
