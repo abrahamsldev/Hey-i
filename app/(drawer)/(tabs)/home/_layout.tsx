@@ -7,6 +7,7 @@ export default function HomeStack() {
       <Stack.Screen name="insights" />
       <Stack.Screen name="purchase-recommendation" />
       <Stack.Screen name="financial-health" />
+      <Stack.Screen name="products" />
     </Stack>
   );
 }
