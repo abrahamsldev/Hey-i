@@ -8,6 +8,7 @@ interface ScreenContainerProps {
   style?: ViewStyle;
   scrollable?: boolean;
   padded?: boolean;
+  refreshControl?: React.ReactElement;
 }
 
 export function ScreenContainer({
@@ -15,6 +16,7 @@ export function ScreenContainer({
   style,
   scrollable = false,
   padded = true,
+  refreshControl,
 }: ScreenContainerProps) {
   const insets = useSafeAreaInsets();
 
@@ -32,6 +34,7 @@ export function ScreenContainer({
         contentContainerStyle={inner}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        refreshControl={refreshControl}
       >
         {children}
       </ScrollView>
