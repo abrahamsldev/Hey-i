@@ -103,6 +103,41 @@ export async function deleteUserProfile(userId: string): Promise<void> {
   }
 }
 
+export interface UserSegment {
+  user_id: string;
+  segmento: string;
+  cluster_id: number;
+  score_buro_z: number | null;
+  fail_rate_z: number | null;
+  max_utilizacion_z: number | null;
+  ingreso_z: number | null;
+  ratio_servicios_digitales_z: number | null;
+  has_inversion_z: number | null;
+  nomina_domiciliada_z: number | null;
+  has_cuenta_negocios_z: number | null;
+  updated_at: string;
+}
+
+/**
+ * Obtiene el segmento ML asignado al usuario desde user_segments
+ */
+export async function getUserSegment(
+  userId: string,
+): Promise<UserSegment | null> {
+  const { data, error } = await supabase
+    .from("user_segments")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw new Error(`Error al obtener segmento: ${error.message}`);
+  }
+
+  return data;
+}
+
 /**
  * Verifica si el usuario tiene un perfil
  */

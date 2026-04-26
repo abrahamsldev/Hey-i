@@ -121,7 +121,7 @@ export default function ProfileScreen() {
           <SettingRow
             icon="person-outline"
             label="Editar perfil"
-            onPress={() => {}}
+            onPress={() => router.push("/(drawer)/(tabs)/profile/edit")}
           />
           <View style={styles.divider} />
           <SettingRow

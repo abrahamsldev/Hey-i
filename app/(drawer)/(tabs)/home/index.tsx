@@ -3,7 +3,14 @@ import { AppHeader } from "@/components/AppHeader";
 import { DashboardCard, DonutMini } from "@/components/dashboard";
 import { InsightCard } from "@/components/InsightCard";
 import { ScreenContainer } from "@/components/ScreenContainer";
-import { colors, fontSize, fontWeight, spacing } from "@/constants/design";
+import {
+  colors,
+  fontSize,
+  fontWeight,
+  radius,
+  spacing,
+} from "@/constants/design";
+import { getRecommendedProducts, HeyProduct } from "@/constants/products";
 import { useAuth } from "@/context/AuthContext";
 import { formatCurrency, getDashboards } from "@/services/dashboardsService";
 import { getPrimaryInsight } from "@/services/insightsService";
@@ -17,11 +24,11 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const CARDS = [
   {
-    id: "purchase",
-    title: "Recomendación de compra",
-    description: "Analiza tus hábitos y sugiere oportunidades.",
-    icon: "cart-outline",
-    route: "/(drawer)/(tabs)/home/purchase-recommendation",
+    id: "products",
+    title: "Productos para ti",
+    description: "Descubre los productos Hey Banco según tu perfil.",
+    icon: "grid-outline",
+    route: "/(drawer)/(tabs)/home/products",
   },
 ] as const;
 
@@ -158,14 +165,14 @@ export default function HomeScreen() {
         }
         right={
           <Pressable
-            onPress={loadInsight}
+            onPress={handleRefresh}
             hitSlop={8}
-            disabled={loadingInsight}
+            disabled={loadingDashboards}
           >
             <Ionicons
               name="refresh-outline"
               size={22}
-              color={loadingInsight ? colors.muted : colors.foreground}
+              color={loadingDashboards ? colors.muted : colors.foreground}
             />
           </Pressable>
         }
@@ -185,6 +192,73 @@ export default function HomeScreen() {
               compact
               onPress={() => router.push("/(drawer)/(tabs)/home/insights")}
             />
+          </View>
+        )}
+
+        {/* Productos recomendados — preview */}
+        {!loadingInsight && primaryInsight && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Para ti</Text>
+              <Pressable
+                onPress={() => router.push("/(drawer)/(tabs)/home/products")}
+                hitSlop={8}
+              >
+                <Text style={styles.seeAll}>Ver todos</Text>
+              </Pressable>
+            </View>
+            {getRecommendedProducts(
+              primaryInsight.insight_type,
+              primaryInsight.segment_name,
+            )
+              .slice(0, 2)
+              .map((product: HeyProduct) => (
+                <AppCard
+                  key={product.id}
+                  onPress={() => router.push("/(drawer)/(tabs)/home/products")}
+                  style={styles.productPreviewCard}
+                >
+                  <View style={styles.productPreviewRow}>
+                    <View
+                      style={[
+                        styles.productPreviewIcon,
+                        { backgroundColor: product.color + "18" },
+                      ]}
+                    >
+                      <Ionicons
+                        name={product.icon as any}
+                        size={20}
+                        color={product.color}
+                      />
+                    </View>
+                    <View style={styles.productPreviewInfo}>
+                      <Text style={styles.productPreviewName}>
+                        {product.name}
+                      </Text>
+                      <Text style={styles.productPreviewTagline}>
+                        {product.tagline}
+                      </Text>
+                    </View>
+                    {product.badge && (
+                      <View
+                        style={[
+                          styles.productBadge,
+                          { backgroundColor: product.color + "18" },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.productBadgeText,
+                            { color: product.color },
+                          ]}
+                        >
+                          {product.badge}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </AppCard>
+              ))}
           </View>
         )}
 
@@ -210,9 +284,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {primaryInsight ? "Descubrir" : "Explorar"}
-          </Text>
+          <Text style={styles.sectionTitle}>Explorar</Text>
           {CARDS.map((card) => (
             <AppCard
               key={card.id}
@@ -261,6 +333,55 @@ const styles = StyleSheet.create({
   section: {
     paddingTop: spacing.sm,
     gap: spacing.md,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: spacing.md,
+  },
+  seeAll: {
+    fontSize: fontSize.sm,
+    color: colors.muted,
+    fontWeight: fontWeight.medium,
+  },
+  productPreviewCard: {
+    padding: spacing.md,
+  },
+  productPreviewRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
+  productPreviewIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  productPreviewInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  productPreviewName: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    color: colors.foreground,
+  },
+  productPreviewTagline: {
+    fontSize: fontSize.xs,
+    color: colors.muted,
+  },
+  productBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+  },
+  productBadgeText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
   },
   loadingText: {
     fontSize: fontSize.sm,

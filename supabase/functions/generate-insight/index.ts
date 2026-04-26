@@ -178,6 +178,34 @@ serve(async (req) => {
       );
     }
 
+    // Enriquecer trigger_data con campos del perfil cuando el webhook viene de user_profiles
+    const profileFields: Record<string, unknown> = {};
+    if (payload.table === "user_profiles") {
+      const r = payload.record;
+      const PROFILE_KEYS = [
+        "ingreso_mensual_mxn",
+        "gasto_total_anual_mxn",
+        "utilizacion_credito_pct",
+        "tasa_fallos_pct",
+        "num_productos_activos",
+        "dias_desde_ultimo_login",
+        "nomina_domiciliada",
+        "es_hey_pro",
+        "ocupacion",
+        "ciudad",
+        "tiene_seguro",
+        "recibe_remesas",
+        "antiguedad_dias",
+      ] as const;
+      for (const key of PROFILE_KEYS) {
+        if (r[key] !== undefined && r[key] !== null) {
+          profileFields[key] = r[key];
+        }
+      }
+    }
+
+    const enrichedData = { ...detected.data, ...profileFields };
+
     const lambdaRes = await fetch(`${LAMBDA_BASE_URL}/insights/generate`, {
       method: "POST",
       headers: {
@@ -187,7 +215,7 @@ serve(async (req) => {
       body: JSON.stringify({
         user_id: userId,
         trigger_type: detected.trigger,
-        trigger_data: detected.data,
+        trigger_data: enrichedData,
       }),
     });
 

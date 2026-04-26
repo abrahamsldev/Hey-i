@@ -155,7 +155,7 @@ export default function ChatbotScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <AppHeader
-        title="Chatbot"
+        title="Hey! Coach"
         subtitle="Asistente financiero"
         right={
           messages.length > 0 ? (
