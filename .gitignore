@@ -48,3 +48,10 @@ app-example
 
 # schema
 /lib/schema.md
+
+# ignore context files
+/Hey_i_MCP
+/heyi-lambda
+
+# ai context
+/ai_context

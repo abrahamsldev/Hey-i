@@ -1,6 +1,7 @@
 import { colors, fontSize, radius, spacing } from "@/constants/design";
 import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import Markdown from "react-native-markdown-display";
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -49,15 +50,10 @@ export function ChatBubble({ role, content, isLoading }: ChatBubbleProps) {
             <Dot delay={200} />
             <Dot delay={400} />
           </View>
+        ) : isUser ? (
+          <Text style={[styles.text, styles.textUser]}>{content}</Text>
         ) : (
-          <Text
-            style={[
-              styles.text,
-              isUser ? styles.textUser : styles.textAssistant,
-            ]}
-          >
-            {content}
-          </Text>
+          <Markdown style={markdownStyles}>{content}</Markdown>
         )}
       </View>
     </Animated.View>
@@ -127,5 +123,75 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 9999,
     backgroundColor: colors.muted,
+  },
+});
+
+const markdownStyles = StyleSheet.create({
+  body: {
+    color: colors.foreground,
+    fontSize: fontSize.md,
+    lineHeight: 22,
+  },
+  paragraph: {
+    marginTop: 0,
+    marginBottom: spacing.xs,
+  },
+  heading1: {
+    fontSize: fontSize.lg,
+    fontWeight: "700",
+    color: colors.foreground,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  heading2: {
+    fontSize: fontSize.md,
+    fontWeight: "700",
+    color: colors.foreground,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  heading3: {
+    fontSize: fontSize.md,
+    fontWeight: "600",
+    color: colors.foreground,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  strong: {
+    fontWeight: "700",
+    color: colors.foreground,
+  },
+  em: {
+    fontStyle: "italic",
+  },
+  hr: {
+    backgroundColor: colors.border,
+    height: 1,
+    marginVertical: spacing.sm,
+  },
+  bullet_list: {
+    marginBottom: spacing.xs,
+  },
+  ordered_list: {
+    marginBottom: spacing.xs,
+  },
+  list_item: {
+    marginVertical: 2,
+  },
+  code_inline: {
+    backgroundColor: colors.border,
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    fontFamily: "monospace",
+    fontSize: fontSize.sm,
+    color: colors.foreground,
+  },
+  fence: {
+    backgroundColor: colors.inputBackground,
+    borderRadius: radius.sm,
+    padding: spacing.sm,
+    marginVertical: spacing.xs,
+    fontSize: fontSize.sm,
+    color: colors.foreground,
   },
 });

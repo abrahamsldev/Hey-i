@@ -1,8 +1,10 @@
+import { supabase } from "@/lib/supabase";
 import { FinancialInsight } from "@/types/insights";
 
+const HF_SPACE_URL = "https://orbit05-datathon206.hf.space";
+
 /**
- * Mock data de insights financieros
- * TODO: Reemplazar con llamadas reales al API cuando esté disponible
+ * Mock data de insights financieros (fallback cuando el API no está disponible)
  */
 const MOCK_INSIGHTS: FinancialInsight[] = [
   {
@@ -112,22 +114,101 @@ const MOCK_INSIGHTS: FinancialInsight[] = [
 ];
 
 /**
- * Simula una llamada al API de insights
- * @param userId - ID del usuario
- * @param delay - Delay en ms para simular red
+ * Llama al endpoint real del HF Space para obtener el insight del usuario.
+ * Retorna null si el servicio no está disponible.
+ */
+async function fetchInsightFromAPI(
+  userId: string,
+  language = "es",
+): Promise<FinancialInsight | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15_000);
+
+    const resp = await fetch(`${HF_SPACE_URL}/segmentacion/insight/existing`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, language }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!resp.ok) return null;
+
+    const data = await resp.json();
+    // El endpoint puede devolver el objeto directamente o dentro de { response: {...} }
+    const insight: unknown = data?.response ?? data;
+
+    if (
+      insight &&
+      typeof insight === "object" &&
+      "insight_text" in insight &&
+      "cluster" in insight
+    ) {
+      return { ...(insight as FinancialInsight), user_id: userId };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Lee los insights activos del usuario desde la tabla user_insights (Supabase).
+ * Generados automáticamente por triggers + Lambda + MCP.
+ */
+async function fetchInsightsFromDB(
+  userId: string,
+): Promise<FinancialInsight[]> {
+  const { data, error } = await supabase
+    .from("user_insights")
+    .select(
+      "user_id, cluster, segment_name, insight_type, insight_text, status, " +
+        "score_buro, utilizacion_credito_pct, gasto_total_anual_mxn, tasa_fallos_pct, " +
+        "created_at, expires_at",
+    )
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if (error || !data || data.length === 0) return [];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data as any[]).map((row) => ({
+    user_id: row.user_id,
+    cluster: row.cluster ?? 0,
+    segment_name: row.segment_name ?? "Sin segmento",
+    insight_type: row.insight_type ?? "retention_reactivation",
+    insight_text: row.insight_text,
+    status: row.status ?? "ok",
+    score_buro: row.score_buro ?? 0,
+    utilizacion_credito_pct: row.utilizacion_credito_pct ?? 0,
+    gasto_total_anual_mxn: row.gasto_total_anual_mxn ?? 0,
+    tasa_fallos_pct: row.tasa_fallos_pct ?? 0,
+  })) as FinancialInsight[];
+}
+
+/**
+ * Obtiene el insight personalizado del usuario.
+ * Fuente principal: tabla user_insights (generada por triggers).
+ * Fallback: HF Space → mock.
  */
 export async function getUserInsights(
   userId: string,
-  delay: number = 500,
 ): Promise<FinancialInsight[]> {
-  // Simular delay de red
-  await new Promise((resolve) => setTimeout(resolve, delay));
+  // 1. Intentar leer insights pre-generados desde Supabase
+  const dbInsights = await fetchInsightsFromDB(userId);
+  if (dbInsights.length > 0) return dbInsights;
 
-  // Filtrar insights para el usuario (en mock, devolvemos uno aleatorio)
+  // 2. Fallback: llamar al HF Space directamente
+  const real = await fetchInsightFromAPI(userId);
+  if (real) return [real];
+
+  // 3. Fallback final: mock
   const randomInsight =
     MOCK_INSIGHTS[Math.floor(Math.random() * MOCK_INSIGHTS.length)];
-
-  // Retornar con el user_id correcto
   return [{ ...randomInsight, user_id: userId }];
 }
 

@@ -10,6 +10,7 @@ export interface ChatMessage {
 export interface ChatRequest {
   message: string;
   accessToken: string;
+  history?: ChatMessage[];
 }
 
 export interface ChatResponse {
@@ -21,23 +22,38 @@ export async function sendChatMessage(
 ): Promise<ChatResponse> {
   const url = `${LAMBDA_BASE_URL}/chat`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${payload.accessToken}`,
-    },
-    body: JSON.stringify({
-      message: payload.message,
-    }),
-  });
+  const controller = new AbortController();
+  // 5 minutos — tiempo suficiente para iterar todos los modelos de fallback
+  const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.error || `Error del servidor: ${response.status}`,
-    );
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.accessToken}`,
+      },
+      body: JSON.stringify({
+        message: payload.message,
+        history: payload.history ?? [],
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `Error del servidor: ${response.status}`,
+      );
+    }
+
+    return response.json();
+  } catch (err: any) {
+    if (err.name === "AbortError") {
+      throw new Error("La solicitud tardó demasiado. Inténtalo de nuevo.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return response.json();
 }

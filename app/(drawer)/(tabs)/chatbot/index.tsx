@@ -3,10 +3,15 @@ import { ChatBubble } from "@/components/ChatBubble";
 import { TextInputBar } from "@/components/TextInputBar";
 import { colors, fontSize, spacing } from "@/constants/design";
 import { useAuth } from "@/context/AuthContext";
+import {
+  clearChatHistory,
+  loadChatHistory,
+  saveMessage,
+} from "@/services/chatHistoryService";
 import { ChatMessage, sendChatMessage } from "@/services/chatService";
 import * as Haptics from "expo-haptics";
-import React, { useCallback, useRef, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 type Message = ChatMessage & { id: string; loading?: boolean };
 
@@ -37,10 +42,31 @@ function extractTextFromReply(reply: any): string {
 }
 
 export default function ChatbotScreen() {
-  const { session } = useAuth();
+  const { session, user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const flatListRef = useRef<FlatList>(null);
+
+  // Cargar historial al montar
+  useEffect(() => {
+    if (!user?.id) {
+      setHistoryLoading(false);
+      return;
+    }
+    loadChatHistory(user.id)
+      .then((history) => {
+        setMessages(history.map((msg, i) => ({ ...msg, id: `history-${i}` })));
+      })
+      .catch(console.error)
+      .finally(() => setHistoryLoading(false));
+  }, [user?.id]);
+
+  const handleClearHistory = useCallback(async () => {
+    if (!user?.id) return;
+    await clearChatHistory(user.id).catch(console.error);
+    setMessages([]);
+  }, [user?.id]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -70,12 +96,28 @@ export default function ChatbotScreen() {
           throw new Error("No estás autenticado");
         }
 
+        // Guardar mensaje del usuario (no bloqueante)
+        if (user?.id) {
+          saveMessage(user.id, "user", text).catch(console.error);
+        }
+
+        // Historial actual sin el mensaje de loading
+        const history: ChatMessage[] = messages
+          .filter((m) => m.id !== "loading" && !m.loading)
+          .map(({ role, content }) => ({ role, content }));
+
         const res = await sendChatMessage({
           message: text,
           accessToken: session.access_token,
+          history,
         });
 
         const replyText = extractTextFromReply(res.reply);
+
+        // Guardar respuesta del asistente (no bloqueante)
+        if (user?.id) {
+          saveMessage(user.id, "assistant", replyText).catch(console.error);
+        }
 
         setMessages((prev) => [
           ...prev.filter((m) => m.id !== "loading"),
@@ -96,14 +138,24 @@ export default function ChatbotScreen() {
         setLoading(false);
       }
     },
-    [session],
+    [session, user, messages],
   );
 
   return (
     <View style={styles.root}>
-      <AppHeader title="Chatbot" subtitle="Asistente financiero" />
+      <AppHeader
+        title="Chatbot"
+        subtitle="Asistente financiero"
+        right={
+          messages.length > 0 ? (
+            <Pressable onPress={handleClearHistory} hitSlop={8}>
+              <Text style={styles.clearBtn}>Limpiar</Text>
+            </Pressable>
+          ) : undefined
+        }
+      />
 
-      {messages.length === 0 && (
+      {!historyLoading && messages.length === 0 && (
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>¿En qué puedo ayudarte?</Text>
           <Text style={styles.emptySubtitle}>
@@ -164,5 +216,9 @@ const styles = StyleSheet.create({
     color: colors.muted,
     textAlign: "center",
     lineHeight: 22,
+  },
+  clearBtn: {
+    fontSize: fontSize.sm,
+    color: colors.muted,
   },
 });

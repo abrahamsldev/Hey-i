@@ -89,8 +89,10 @@ export default function InsightsScreen() {
                 color={colors.muted}
               />
               <Text style={styles.infoText}>
-                Estos insights se generan usando inteligencia artificial y se
-                actualizan semanalmente según tu actividad financiera.
+                Estos insights se generan automáticamente cuando detectamos
+                cambios relevantes en tu actividad financiera (cargos fallidos,
+                crédito al límite, inactividad, etc.) y se actualizan en tiempo
+                real.
               </Text>
             </View>
           </>
