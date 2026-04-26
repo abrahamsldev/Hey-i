@@ -66,22 +66,7 @@ export async function getSpendingDashboard(
     accessToken,
   );
 
-  console.log("[spending] raw response keys:", Object.keys(data ?? {}));
-  console.log(
-    "[spending] structuredContent type:",
-    typeof data?.structuredContent,
-  );
-  console.log(
-    "[spending] structuredContent:",
-    JSON.stringify(data?.structuredContent)?.slice(0, 500),
-  );
-
   const content = parseMCPContent(data?.structuredContent);
-
-  console.log("[spending] content.ok:", content?.ok);
-  console.log("[spending] content.charts length:", content?.charts?.length);
-  console.log("[spending] content.errors:", content?.errors);
-
   return { ...content, charts: content?.charts ?? [] };
 }
 
@@ -93,22 +78,7 @@ export async function getSavingsDashboard(
     accessToken,
   );
 
-  console.log("[savings] raw response keys:", Object.keys(data ?? {}));
-  console.log(
-    "[savings] structuredContent type:",
-    typeof data?.structuredContent,
-  );
-  console.log(
-    "[savings] structuredContent:",
-    JSON.stringify(data?.structuredContent)?.slice(0, 500),
-  );
-
   const content = parseMCPContent(data?.structuredContent);
-
-  console.log("[savings] content.ok:", content?.ok);
-  console.log("[savings] content.charts length:", content?.charts?.length);
-  console.log("[savings] content.errors:", content?.errors);
-
   return { ...content, charts: content?.charts ?? [] };
 }
 
