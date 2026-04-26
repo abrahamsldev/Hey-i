@@ -27,13 +27,6 @@ const CARDS = [
     icon: "pulse-outline",
     route: "/(drawer)/(tabs)/home/financial-health",
   },
-  {
-    id: "insights",
-    title: "Insights LLM",
-    description: "Perspectivas generadas por inteligencia artificial.",
-    icon: "bulb-outline",
-    route: "/(drawer)/(tabs)/home/insights",
-  },
 ] as const;
 
 export default function HomeScreen() {
@@ -73,7 +66,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.root}>
       <AppHeader
-        title="heyi"
+        title="Hey!i"
         subtitle={`Hola, ${displayName}`}
         left={
           <Pressable onPress={openDrawer} hitSlop={8}>
@@ -85,7 +78,6 @@ export default function HomeScreen() {
         {/* Insight Principal */}
         {!loadingInsight && primaryInsight && (
           <View style={styles.insightSection}>
-            <Text style={styles.sectionTitle}>Tu insight del día</Text>
             <InsightCard
               insight={primaryInsight}
               compact

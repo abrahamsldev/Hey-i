@@ -1,9 +1,9 @@
 import {
-    colors,
-    fontSize,
-    fontWeight,
-    radius,
-    spacing,
+  colors,
+  fontSize,
+  fontWeight,
+  radius,
+  spacing,
 } from "@/constants/design";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -42,7 +42,7 @@ export function DrawerContent(props: any) {
     <DrawerContentScrollView {...props} style={styles.container}>
       <View style={styles.header}>
         <View style={styles.appNameRow}>
-          <Text style={styles.appName}>heyi</Text>
+          <Text style={styles.appName}>Hey!i</Text>
         </View>
         {user?.email && (
           <Text style={styles.email} numberOfLines={1}>
