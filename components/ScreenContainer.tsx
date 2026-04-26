@@ -1,6 +1,6 @@
 import { colors, spacing } from "@/constants/design";
 import React from "react";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { RefreshControlProps, StyleSheet, View, ViewStyle } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -9,7 +9,7 @@ interface ScreenContainerProps {
   style?: ViewStyle;
   scrollable?: boolean;
   padded?: boolean;
-  refreshControl?: React.ReactElement;
+  refreshControl?: React.ReactElement<RefreshControlProps>;
 }
 
 export function ScreenContainer({
