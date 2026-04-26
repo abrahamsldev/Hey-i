@@ -11,7 +11,15 @@ import {
 import { ChatMessage, sendChatMessage } from "@/services/chatService";
 import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 type Message = ChatMessage & { id: string; loading?: boolean };
 
@@ -142,7 +150,10 @@ export default function ChatbotScreen() {
   );
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <AppHeader
         title="Chatbot"
         subtitle="Asistente financiero"
@@ -184,7 +195,7 @@ export default function ChatbotScreen() {
       />
 
       <TextInputBar onSend={sendMessage} disabled={loading} />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

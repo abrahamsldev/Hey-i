@@ -64,7 +64,7 @@ export default function SettingsScreen() {
         <AppCard animateIn>
           <Text style={styles.version}>Versión 1.0.0</Text>
           <Text style={styles.versionSub}>
-            heyi · Asistente financiero personal
+            Hei!i · Asistente financiero personal
           </Text>
         </AppCard>
       </ScreenContainer>

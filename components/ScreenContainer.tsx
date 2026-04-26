@@ -1,6 +1,7 @@
 import { colors, spacing } from "@/constants/design";
 import React from "react";
-import { ScrollView, StyleSheet, View, ViewStyle } from "react-native";
+import { StyleSheet, View, ViewStyle } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ScreenContainerProps {
@@ -20,7 +21,7 @@ export function ScreenContainer({
 }: ScreenContainerProps) {
   const insets = useSafeAreaInsets();
 
-  const inner = [
+  const contentStyle = [
     styles.inner,
     padded && styles.padded,
     { paddingBottom: insets.bottom + spacing.lg },
@@ -29,19 +30,21 @@ export function ScreenContainer({
 
   if (scrollable) {
     return (
-      <ScrollView
+      <KeyboardAwareScrollView
         style={styles.container}
-        contentContainerStyle={inner}
+        contentContainerStyle={contentStyle}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={16}
         refreshControl={refreshControl}
       >
         {children}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     );
   }
 
-  return <View style={[styles.container, inner]}>{children}</View>;
+  return <View style={[styles.container, contentStyle]}>{children}</View>;
 }
 
 const styles = StyleSheet.create({

@@ -1,10 +1,5 @@
 import { AppCard } from "@/components/AppCard";
-import {
-    colors,
-    fontSize,
-    fontWeight,
-    spacing
-} from "@/constants/design";
+import { colors, fontSize, fontWeight, spacing } from "@/constants/design";
 import {
     formatCurrency,
     getBuroScoreColor,
@@ -47,7 +42,6 @@ export function InsightCard({
           />
         </View>
         <View style={styles.headerText}>
-          <Text style={styles.segmentName}>{insight.segment_name}</Text>
           <Text style={styles.insightTitle}>{metadata.title}</Text>
         </View>
       </View>
