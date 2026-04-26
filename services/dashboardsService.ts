@@ -62,9 +62,7 @@ export async function getSavingsDashboard(
   return data.structuredContent;
 }
 
-export async function getDashboards(
-  accessToken: string,
-): Promise<{
+export async function getDashboards(accessToken: string): Promise<{
   spending: Dashboard;
   savings: Dashboard;
 }> {

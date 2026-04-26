@@ -28,7 +28,7 @@ const CARDS = [
 export default function HomeScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [primaryInsight, setPrimaryInsight] = useState<FinancialInsight | null>(
     null,
   );
@@ -68,7 +68,9 @@ export default function HomeScreen() {
   const loadDashboards = async () => {
     try {
       setLoadingDashboards(true);
-      const { spending, savings } = await getDashboards(user?.id ?? "");
+      const { spending, savings } = await getDashboards(
+        session?.access_token ?? "",
+      );
       setSpendingDashboard(spending);
       setSavingsDashboard(savings);
     } catch (error) {

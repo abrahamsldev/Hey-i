@@ -1,27 +1,26 @@
 import { AppCard } from "@/components/AppCard";
+import { BarMini, DonutMini, LineMini } from "@/components/dashboard";
 import { ScreenContainer } from "@/components/ScreenContainer";
 import { colors, fontSize, fontWeight, spacing } from "@/constants/design";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import {
-  BarMini,
-  DonutMini,
-  LineMini,
-} from "@/components/dashboard";
 
-import { getDashboards, formatCurrency } from "@/services/dashboardsService";
-import { Dashboard } from "@/types/dashboards";
 import { useAuth } from "@/context/AuthContext";
-
+import { formatCurrency, getDashboards } from "@/services/dashboardsService";
+import { Dashboard } from "@/types/dashboards";
 
 export default function FinancialHealthScreen() {
   const router = useRouter();
-  const [spendingDashboard, setSpendingDashboard] = useState<Dashboard | null>(null);
-  const [savingsDashboard, setSavingsDashboard] = useState<Dashboard | null>(null);
+  const [spendingDashboard, setSpendingDashboard] = useState<Dashboard | null>(
+    null,
+  );
+  const [savingsDashboard, setSavingsDashboard] = useState<Dashboard | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, session } = useAuth();
 
   useEffect(() => {
     loadDashboards();
@@ -30,7 +29,9 @@ export default function FinancialHealthScreen() {
   const loadDashboards = async () => {
     try {
       setLoading(true);
-      const { spending, savings } = await getDashboards(user?.id ?? "");
+      const { spending, savings } = await getDashboards(
+        session?.access_token ?? "",
+      );
       setSpendingDashboard(spending);
       setSavingsDashboard(savings);
     } catch (e) {
@@ -61,13 +62,11 @@ export default function FinancialHealthScreen() {
     (chart) => chart.id === "savings_investment_growth",
   );
   const donutTotal = Number(spendingDonut?.summary?.total_mxn ?? 0);
-  const donutTopCategory = String(
-    spendingDonut?.summary?.top_category ?? "",
-  );
+  const donutTopCategory = String(spendingDonut?.summary?.top_category ?? "");
 
   const donutSeries = spendingDonut?.series?.[0]?.data ?? [];
-  const lineValues = (spendingLine?.series?.[0]?.data ?? []).map(
-    (p) => Number(p.y ?? 0),
+  const lineValues = (spendingLine?.series?.[0]?.data ?? []).map((p) =>
+    Number(p.y ?? 0),
   );
 
   const merchantTop = topMerchants?.series?.[0]?.data?.[0];
@@ -80,30 +79,24 @@ export default function FinancialHealthScreen() {
   const spendLatest = Number(
     incomeVsSpend?.summary?.latest_month_spend_mxn ?? 0,
   );
-  const dailyAverage = Number(
-      spendingLine?.summary?.average_daily_mxn ?? 0,
-    );
-   const investmentTotal = Number(
-      investmentGrowth?.summary?.final_cumulative_mxn ?? 0,
-    );
-  const netLatest = Number(
-    incomeVsSpend?.summary?.latest_month_net_mxn ?? 0,
+  const dailyAverage = Number(spendingLine?.summary?.average_daily_mxn ?? 0);
+  const investmentTotal = Number(
+    investmentGrowth?.summary?.final_cumulative_mxn ?? 0,
   );
-  const projectionCategory = String(
-      savingsProjection?.summary?.category ?? "",
-    );
-    const projectedSavings = Number(
-      savingsProjection?.summary?.projected_savings_mxn ?? 0,
-    );
-    const projectionCurrent = Number(
-      savingsProjection?.summary?.current_month_spend_mxn ?? 0,
-    );
-    const projectedSpend = Number(
-      savingsProjection?.summary?.projected_spend_mxn ?? 0,
-    );
-   const investmentCount = Number(
-      investmentGrowth?.summary?.investment_tx_count ?? 0,
-    );
+  const netLatest = Number(incomeVsSpend?.summary?.latest_month_net_mxn ?? 0);
+  const projectionCategory = String(savingsProjection?.summary?.category ?? "");
+  const projectedSavings = Number(
+    savingsProjection?.summary?.projected_savings_mxn ?? 0,
+  );
+  const projectionCurrent = Number(
+    savingsProjection?.summary?.current_month_spend_mxn ?? 0,
+  );
+  const projectedSpend = Number(
+    savingsProjection?.summary?.projected_spend_mxn ?? 0,
+  );
+  const investmentCount = Number(
+    investmentGrowth?.summary?.investment_tx_count ?? 0,
+  );
   const investmentValues = (investmentGrowth?.series?.[0]?.data ?? []).map(
     (p) => Number(p.y ?? 0),
   );
@@ -114,185 +107,198 @@ export default function FinancialHealthScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8}>
           <Ionicons name="arrow-back" size={24} color={colors.foreground} />
         </Pressable>
-        
+
         <Text style={styles.title}>Salud financiera</Text>
         <View style={{ width: 24 }} />
       </View>
-   <ScreenContainer scrollable padded>
-    {loading && <Text>Cargando...</Text>}
-{!loading && (
-  <>
-    {/* DONA */}
-    <AppCard style={styles.card}>
-      <Text style={styles.sectionTitle}>Salud financiera</Text>
+      <ScreenContainer scrollable padded>
+        {loading && <Text>Cargando...</Text>}
+        {!loading && (
+          <>
+            {/* DONA */}
+            <AppCard style={styles.card}>
+              <Text style={styles.sectionTitle}>Salud financiera</Text>
 
-      <Text style={styles.value}>
-        {formatCurrency(donutTotal, "MXN", 0)}
-      </Text>
+              <Text style={styles.value}>
+                {formatCurrency(donutTotal, "MXN", 0)}
+              </Text>
 
-      <Text style={styles.insight}>
-        Principal gasto: {donutTopCategory || "-"}
-      </Text>
+              <Text style={styles.insight}>
+                Principal gasto: {donutTopCategory || "-"}
+              </Text>
 
-      <View style={{ alignItems: "center", marginVertical: spacing.sm }}>
-        <DonutMini
-          size={140}
-          strokeWidth={16}
-          data={donutSeries.map((item, index) => ({
-            label: String(item.label ?? index),
-            value: Number(item.value ?? 0),
-            color: DONUT_COLORS[index % DONUT_COLORS.length],
-          }))}
-        />
-      </View>
+              <View
+                style={{ alignItems: "center", marginVertical: spacing.sm }}
+              >
+                <DonutMini
+                  size={140}
+                  strokeWidth={16}
+                  data={donutSeries.map((item, index) => ({
+                    label: String(item.label ?? index),
+                    value: Number(item.value ?? 0),
+                    color: DONUT_COLORS[index % DONUT_COLORS.length],
+                  }))}
+                />
+              </View>
 
-      <View style={styles.legend}>
-        {donutSeries.map((item, index) => (
-          <View key={index} style={styles.legendItem}>
-            <View
-              style={[
-                styles.legendDot,
-                { backgroundColor: DONUT_COLORS[index % DONUT_COLORS.length] },
-              ]}
-            />
-            <Text style={styles.legendLabel}>{String(item.label)}</Text>
-          </View>
-        ))}
-      </View>
-    </AppCard>
+              <View style={styles.legend}>
+                {donutSeries.map((item, index) => (
+                  <View key={index} style={styles.legendItem}>
+                    <View
+                      style={[
+                        styles.legendDot,
+                        {
+                          backgroundColor:
+                            DONUT_COLORS[index % DONUT_COLORS.length],
+                        },
+                      ]}
+                    />
+                    <Text style={styles.legendLabel}>{String(item.label)}</Text>
+                  </View>
+                ))}
+              </View>
+            </AppCard>
 
-    {/* CASHFLOW */}
-    <AppCard style={styles.card}>
-      <Text style={styles.sectionTitle}>Flujo de dinero</Text>
+            {/* CASHFLOW */}
+            <AppCard style={styles.card}>
+              <Text style={styles.sectionTitle}>Flujo de dinero</Text>
 
-      <View style={styles.cardRow}>
-        <View style={styles.textBlock}>
-          <Text style={styles.value}>
-            {formatCurrency(netLatest, "MXN", 0)}
-          </Text>
+              <View style={styles.cardRow}>
+                <View style={styles.textBlock}>
+                  <Text style={styles.value}>
+                    {formatCurrency(netLatest, "MXN", 0)}
+                  </Text>
 
-          <Text style={styles.insight}>
-            Sobra {formatCurrency(netLatest, "MXN", 0)} este mes
-          </Text>
-        </View>
+                  <Text style={styles.insight}>
+                    Sobra {formatCurrency(netLatest, "MXN", 0)} este mes
+                  </Text>
+                </View>
 
-        <View style={styles.chartBlock}>
-          <BarMini
-            orientation="horizontal"
-            width={120}
-            height={60}
-            data={[
-              { label: "Ingreso", value: incomeLatest, color: colors.foreground },
-              { label: "Gasto", value: spendLatest, color: "#f97316" },
-              { label: "Neto", value: netLatest, color: "#10b981" },
-            ]}
-          />
-        </View>
-      </View>
-    </AppCard>
+                <View style={styles.chartBlock}>
+                  <BarMini
+                    orientation="horizontal"
+                    width={120}
+                    height={60}
+                    data={[
+                      {
+                        label: "Ingreso",
+                        value: incomeLatest,
+                        color: colors.foreground,
+                      },
+                      { label: "Gasto", value: spendLatest, color: "#f97316" },
+                      { label: "Neto", value: netLatest, color: "#10b981" },
+                    ]}
+                  />
+                </View>
+              </View>
+            </AppCard>
 
-    {/* TENDENCIA */}
-    <AppCard style={styles.card}>
-      <Text style={styles.sectionTitle}>Tendencia de gasto</Text>
+            {/* TENDENCIA */}
+            <AppCard style={styles.card}>
+              <Text style={styles.sectionTitle}>Tendencia de gasto</Text>
 
-      <View style={styles.cardRow}>
-        <View style={styles.textBlock}>
-          <Text style={styles.value}>
-            {formatCurrency(donutTotal, "MXN", 0)}
-          </Text>
+              <View style={styles.cardRow}>
+                <View style={styles.textBlock}>
+                  <Text style={styles.value}>
+                    {formatCurrency(donutTotal, "MXN", 0)}
+                  </Text>
 
-          <Text style={styles.insight}>
-            Promedio diario {formatCurrency(dailyAverage, "MXN", 0)}
-          </Text>
-        </View>
+                  <Text style={styles.insight}>
+                    Promedio diario {formatCurrency(dailyAverage, "MXN", 0)}
+                  </Text>
+                </View>
 
-        <View style={styles.chartBlock}>
-          <LineMini values={lineValues} width={120} height={50} />
-        </View>
-      </View>
-    </AppCard>
+                <View style={styles.chartBlock}>
+                  <LineMini values={lineValues} width={120} height={50} />
+                </View>
+              </View>
+            </AppCard>
 
-    {/* TOP MERCHANT */}
-    <AppCard style={styles.card}>
-      <Text style={styles.sectionTitle}>Top comercios</Text>
+            {/* TOP MERCHANT */}
+            <AppCard style={styles.card}>
+              <Text style={styles.sectionTitle}>Top comercios</Text>
 
-      <Text style={styles.value}>
-        {formatCurrency(topMerchantValue, "MXN", 0)}
-      </Text>
+              <Text style={styles.value}>
+                {formatCurrency(topMerchantValue, "MXN", 0)}
+              </Text>
 
-      <Text style={styles.insight}>
-        {topMerchantLabel} #1 del mes
-      </Text>
+              <Text style={styles.insight}>{topMerchantLabel} #1 del mes</Text>
 
-      <View style={{ marginTop: spacing.sm }}>
-        {merchants.slice(0, 5).map((item, index) => (
-          <View key={index} style={styles.row}>
-            <Text style={styles.rank}>#{index + 1}</Text>
+              <View style={{ marginTop: spacing.sm }}>
+                {merchants.slice(0, 5).map((item, index) => (
+                  <View key={index} style={styles.row}>
+                    <Text style={styles.rank}>#{index + 1}</Text>
 
-            <Text style={styles.merchantLabel} numberOfLines={1}>
-              {item.label}
-            </Text>
+                    <Text style={styles.merchantLabel} numberOfLines={1}>
+                      {item.label}
+                    </Text>
 
-            <Text style={styles.merchantValue}>
-              {formatCurrency(Number(item.value), "MXN", 0)}
-            </Text>
-          </View>
-        ))}
-      </View>
-    </AppCard>
+                    <Text style={styles.merchantValue}>
+                      {formatCurrency(Number(item.value), "MXN", 0)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </AppCard>
 
-    {/* AHORRO */}
-    <AppCard style={styles.card}>
-      <Text style={styles.sectionTitle}>Ahorro potencial</Text>
+            {/* AHORRO */}
+            <AppCard style={styles.card}>
+              <Text style={styles.sectionTitle}>Ahorro potencial</Text>
 
-      <View style={styles.cardRow}>
-        <View style={styles.textBlock}>
-          <Text style={styles.value}>
-            {formatCurrency(projectedSavings, "MXN", 0)}
-          </Text>
+              <View style={styles.cardRow}>
+                <View style={styles.textBlock}>
+                  <Text style={styles.value}>
+                    {formatCurrency(projectedSavings, "MXN", 0)}
+                  </Text>
 
-          <Text style={styles.insight}>
-            Reducir 10% en {projectionCategory || "categoría"}
-          </Text>
-        </View>
+                  <Text style={styles.insight}>
+                    Reducir 10% en {projectionCategory || "categoría"}
+                  </Text>
+                </View>
 
-        <View style={styles.chartBlock}>
-          <BarMini
-            orientation="horizontal"
-            width={120}
-            height={50}
-            data={[
-              { label: "Actual", value: projectionCurrent, color: colors.foreground },
-              { label: "Proyectado", value: projectedSpend, color: "#10b981" },
-            ]}
-          />
-        </View>
-      </View>
-    </AppCard>
+                <View style={styles.chartBlock}>
+                  <BarMini
+                    orientation="horizontal"
+                    width={120}
+                    height={50}
+                    data={[
+                      {
+                        label: "Actual",
+                        value: projectionCurrent,
+                        color: colors.foreground,
+                      },
+                      {
+                        label: "Proyectado",
+                        value: projectedSpend,
+                        color: "#10b981",
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+            </AppCard>
 
-    {/* INVERSION */}
-    <AppCard style={styles.card}>
-      <Text style={styles.sectionTitle}>Inversión acumulada</Text>
+            {/* INVERSION */}
+            <AppCard style={styles.card}>
+              <Text style={styles.sectionTitle}>Inversión acumulada</Text>
 
-      <View style={styles.cardRow}>
-        <View style={styles.textBlock}>
-          <Text style={styles.value}>
-            {formatCurrency(investmentTotal, "MXN", 0)}
-          </Text>
+              <View style={styles.cardRow}>
+                <View style={styles.textBlock}>
+                  <Text style={styles.value}>
+                    {formatCurrency(investmentTotal, "MXN", 0)}
+                  </Text>
 
-          <Text style={styles.insight}>
-            {investmentCount} aportes
-          </Text>
-        </View>
+                  <Text style={styles.insight}>{investmentCount} aportes</Text>
+                </View>
 
-        <View style={styles.chartBlock}>
-          <LineMini values={investmentValues} width={120} height={50} />
-        </View>
-      </View>
-    </AppCard>
-  </>
-)}
-</ScreenContainer>
+                <View style={styles.chartBlock}>
+                  <LineMini values={investmentValues} width={120} height={50} />
+                </View>
+              </View>
+            </AppCard>
+          </>
+        )}
+      </ScreenContainer>
     </View>
   );
 }
@@ -304,63 +310,63 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   card: {
-  marginBottom: spacing.md,
-  padding: spacing.md,
-},
+    marginBottom: spacing.md,
+    padding: spacing.md,
+  },
 
-cardRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: spacing.md,
-},
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
 
-textBlock: {
-  flex: 1,
-},
+  textBlock: {
+    flex: 1,
+  },
 
-chartBlock: {
-  alignItems: "flex-end",
-  justifyContent: "center",
-},
+  chartBlock: {
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
 
-value: {
-  fontSize: fontSize.xl,
-  fontWeight: fontWeight.bold,
-  color: colors.foreground,
-  marginBottom: 4,
-},
+  value: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.foreground,
+    marginBottom: 4,
+  },
 
-insight: {
-  fontSize: fontSize.sm,
-  color: colors.muted,
-  marginBottom: spacing.sm,
-},
+  insight: {
+    fontSize: fontSize.sm,
+    color: colors.muted,
+    marginBottom: spacing.sm,
+  },
 
-row: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: 6,
-},
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
 
-rank: {
-  width: 24,
-  fontSize: fontSize.sm,
-  color: colors.muted,
-},
+  rank: {
+    width: 24,
+    fontSize: fontSize.sm,
+    color: colors.muted,
+  },
 
-merchantLabel: {
-  flex: 1,
-  fontSize: fontSize.sm,
-  color: colors.foreground,
-},
+  merchantLabel: {
+    flex: 1,
+    fontSize: fontSize.sm,
+    color: colors.foreground,
+  },
 
-merchantValue: {
-  fontSize: fontSize.sm,
-  fontWeight: fontWeight.semibold,
-  color: colors.foreground,
-},
+  merchantValue: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    color: colors.foreground,
+  },
   content: {
     padding: spacing.lg,
   },
@@ -409,7 +415,7 @@ merchantValue: {
     fontSize: fontSize.xs,
     color: colors.muted,
   },
-    title: {
+  title: {
     fontSize: fontSize.lg,
     fontWeight: fontWeight.bold,
     color: colors.foreground,
@@ -433,5 +439,4 @@ merchantValue: {
     color: colors.foreground,
     marginTop: 2,
   },
-
 });
