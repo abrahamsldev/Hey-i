@@ -48,7 +48,26 @@ export async function getSpendingDashboard(
     accessToken,
   );
 
-  return data.structuredContent;
+  console.log("[spending] raw response keys:", Object.keys(data ?? {}));
+  console.log(
+    "[spending] structuredContent type:",
+    typeof data?.structuredContent,
+  );
+  console.log(
+    "[spending] structuredContent:",
+    JSON.stringify(data?.structuredContent)?.slice(0, 500),
+  );
+
+  const content =
+    typeof data.structuredContent === "string"
+      ? JSON.parse(data.structuredContent)
+      : data.structuredContent;
+
+  console.log("[spending] content.ok:", content?.ok);
+  console.log("[spending] content.charts length:", content?.charts?.length);
+  console.log("[spending] content.errors:", content?.errors);
+
+  return { ...content, charts: content?.charts ?? [] };
 }
 
 export async function getSavingsDashboard(
@@ -59,7 +78,26 @@ export async function getSavingsDashboard(
     accessToken,
   );
 
-  return data.structuredContent;
+  console.log("[savings] raw response keys:", Object.keys(data ?? {}));
+  console.log(
+    "[savings] structuredContent type:",
+    typeof data?.structuredContent,
+  );
+  console.log(
+    "[savings] structuredContent:",
+    JSON.stringify(data?.structuredContent)?.slice(0, 500),
+  );
+
+  const content =
+    typeof data.structuredContent === "string"
+      ? JSON.parse(data.structuredContent)
+      : data.structuredContent;
+
+  console.log("[savings] content.ok:", content?.ok);
+  console.log("[savings] content.charts length:", content?.charts?.length);
+  console.log("[savings] content.errors:", content?.errors);
+
+  return { ...content, charts: content?.charts ?? [] };
 }
 
 export async function getDashboards(accessToken: string): Promise<{
