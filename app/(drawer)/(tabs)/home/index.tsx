@@ -195,6 +195,27 @@ export default function HomeScreen() {
           </View>
         )}
 
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Tu resumen</Text>
+          {loadingDashboards && (
+            <Text style={styles.loadingText}>Cargando tu resumen...</Text>
+          )}
+          {!loadingDashboards && widgets.length === 0 && (
+            <Text style={styles.loadingText}>Sin datos disponibles aún.</Text>
+          )}
+          {widgets.map((widget) => (
+            <DashboardCard
+              key={widget.id}
+              title={widget.title}
+              value={widget.value}
+              insight={widget.insight}
+              meta={widget.meta}
+              chart={widget.chart}
+              onPress={widget.onPress}
+            />
+          ))}
+        </View>
+
         {/* Productos recomendados — preview */}
         {!loadingInsight && primaryInsight && (
           <View style={styles.section}>
@@ -261,27 +282,6 @@ export default function HomeScreen() {
               ))}
           </View>
         )}
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tu resumen</Text>
-          {loadingDashboards && (
-            <Text style={styles.loadingText}>Cargando tu resumen...</Text>
-          )}
-          {!loadingDashboards && widgets.length === 0 && (
-            <Text style={styles.loadingText}>Sin datos disponibles aún.</Text>
-          )}
-          {widgets.map((widget) => (
-            <DashboardCard
-              key={widget.id}
-              title={widget.title}
-              value={widget.value}
-              insight={widget.insight}
-              meta={widget.meta}
-              chart={widget.chart}
-              onPress={widget.onPress}
-            />
-          ))}
-        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Explorar</Text>
@@ -391,7 +391,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.lg,
     fontWeight: fontWeight.bold,
     color: colors.foreground,
-    marginBottom: spacing.md,
   },
   legend: {
     alignItems: "flex-start",
