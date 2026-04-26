@@ -7,15 +7,13 @@ import {
     radius,
     spacing,
 } from "@/constants/design";
-import {
-    getOtherProducts,
-    getRecommendedProducts,
-    HeyProduct,
-} from "@/constants/products";
+import { HEY_PRODUCTS, HeyProduct } from "@/constants/products";
 import { useAuth } from "@/context/AuthContext";
-import { getPrimaryInsight } from "@/services/insightsService";
+import {
+    getAgentProductRecommendations,
+    ProductId,
+} from "@/services/chatService";
 import { getUserSegment } from "@/services/userProfileService";
-import { FinancialInsight, SegmentName } from "@/types/insights";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -27,7 +25,15 @@ import {
     View,
 } from "react-native";
 
-function ProductCard({ product }: { product: HeyProduct }) {
+const productMap = new Map(HEY_PRODUCTS.map((p) => [p.id, p]));
+
+function ProductCard({
+  product,
+  highlighted,
+}: {
+  product: HeyProduct;
+  highlighted?: boolean;
+}) {
   return (
     <AppCard style={styles.productCard} animateIn={false}>
       <View style={styles.productRow}>
@@ -58,6 +64,12 @@ function ProductCard({ product }: { product: HeyProduct }) {
                 </Text>
               </View>
             )}
+            {highlighted && (
+              <View style={styles.aiTag}>
+                <Ionicons name="sparkles" size={11} color="#f59e0b" />
+                <Text style={styles.aiTagText}>Recomendado</Text>
+              </View>
+            )}
           </View>
           <Text style={styles.productTagline}>{product.tagline}</Text>
           <Text style={styles.productDetail}>{product.detail}</Text>
@@ -69,42 +81,56 @@ function ProductCard({ product }: { product: HeyProduct }) {
 
 export default function ProductsScreen() {
   const router = useRouter();
-  const { user } = useAuth();
-  const [insight, setInsight] = useState<FinancialInsight | null>(null);
-  const [segmentName, setSegmentName] = useState<SegmentName | null>(null);
+  const { user, session } = useAuth();
+  const [recommendedIds, setRecommendedIds] = useState<ProductId[]>([]);
+  const [segmentName, setSegmentName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [agentError, setAgentError] = useState(false);
 
-  const load = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const [insightData, segmentData] = await Promise.all([
-        getPrimaryInsight(user.id).catch(() => null),
-        getUserSegment(user.id).catch(() => null),
-      ]);
-      setInsight(insightData);
-      setSegmentName((segmentData?.segmento as SegmentName) ?? null);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [user?.id]);
+  const load = useCallback(
+    async (forceRefresh = false) => {
+      if (!user?.id || !session?.access_token) return;
+      setAgentError(false);
+      try {
+        const [ids, segmentData] = await Promise.all([
+          getAgentProductRecommendations(
+            session.access_token,
+            user.id,
+            forceRefresh,
+          ).catch(() => {
+            setAgentError(true);
+            return [] as ProductId[];
+          }),
+          getUserSegment(user.id).catch(() => null),
+        ]);
+        setRecommendedIds(ids);
+        setSegmentName(segmentData?.segmento ?? null);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [user?.id, session?.access_token],
+  );
 
   useEffect(() => {
-    load();
+    load(false);
   }, [load]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    load();
+    load(true); // fuerza nueva consulta al agente
   };
 
-  // Segmento de user_segments es la fuente de verdad; insight_type refina la recomendación
-  const recommended = getRecommendedProducts(
-    insight?.insight_type ?? null,
-    segmentName,
+  const recommended = recommendedIds
+    .map((id) => productMap.get(id))
+    .filter((p): p is HeyProduct => !!p);
+
+  const recommendedSet = new Set(recommendedIds);
+  const others = HEY_PRODUCTS.filter(
+    (p) => !recommendedSet.has(p.id as ProductId),
   );
-  const others = getOtherProducts(recommended.map((p) => p.id));
 
   return (
     <View style={styles.root}>
@@ -130,6 +156,7 @@ export default function ProductsScreen() {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="small" color={colors.foreground} />
+          <Text style={styles.loadingText}>Analizando tu perfil...</Text>
         </View>
       ) : (
         <ScreenContainer
@@ -147,23 +174,52 @@ export default function ProductsScreen() {
                 color={colors.muted}
               />
               <Text style={styles.segmentText}>
-                Recomendaciones para tu perfil:{" "}
+                Perfil detectado:{" "}
                 <Text style={styles.segmentName}>{segmentName}</Text>
               </Text>
             </View>
           )}
 
-          {/* Recomendados */}
-          <Text style={styles.sectionTitle}>Para ti</Text>
-          {recommended.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {/* Error del agente — muestra todos los productos sin sección "Para ti" */}
+          {agentError && (
+            <View style={styles.errorRow}>
+              <Ionicons
+                name="information-circle-outline"
+                size={16}
+                color={colors.muted}
+              />
+              <Text style={styles.errorText}>
+                No se pudo personalizar. Mostrando catálogo completo.
+              </Text>
+            </View>
+          )}
 
-          {/* Todos los demás */}
-          <Text style={[styles.sectionTitle, { marginTop: spacing.lg }]}>
-            Más productos
+          {/* Recomendados por el agente */}
+          {recommended.length > 0 && (
+            <>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Para ti</Text>
+                <View style={styles.aiLabel}>
+                  <Ionicons name="sparkles" size={12} color="#f59e0b" />
+                  <Text style={styles.aiLabelText}>Personalizado con IA</Text>
+                </View>
+              </View>
+              {recommended.map((product) => (
+                <ProductCard key={product.id} product={product} highlighted />
+              ))}
+            </>
+          )}
+
+          {/* Resto del catálogo */}
+          <Text
+            style={[
+              styles.sectionTitle,
+              recommended.length > 0 && { marginTop: spacing.lg },
+            ]}
+          >
+            {recommended.length > 0 ? "Más productos" : "Todos los productos"}
           </Text>
-          {others.map((product) => (
+          {(agentError ? HEY_PRODUCTS : others).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </ScreenContainer>
@@ -196,6 +252,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    gap: spacing.sm,
+  },
+  loadingText: {
+    fontSize: fontSize.sm,
+    color: colors.muted,
   },
   segmentRow: {
     flexDirection: "row",
@@ -214,11 +275,40 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.semibold,
     color: colors.foreground,
   },
+  errorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: colors.inputBackground,
+    borderRadius: radius.md,
+  },
+  errorText: {
+    fontSize: fontSize.sm,
+    color: colors.muted,
+    flex: 1,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: spacing.md,
+  },
   sectionTitle: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
     color: colors.foreground,
-    marginBottom: spacing.md,
+  },
+  aiLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  aiLabelText: {
+    fontSize: fontSize.xs,
+    color: "#f59e0b",
+    fontWeight: fontWeight.medium,
   },
   productCard: {
     marginBottom: spacing.md,
@@ -259,6 +349,20 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+  },
+  aiTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "#fef3c7",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+  },
+  aiTagText: {
+    fontSize: fontSize.xs,
+    color: "#f59e0b",
     fontWeight: fontWeight.semibold,
   },
   productTagline: {
