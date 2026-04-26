@@ -2,12 +2,8 @@ import { colors, fontSize, radius, spacing } from "@/constants/design";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React, { useState } from "react";
-import {
-    Pressable,
-    StyleSheet,
-    TextInput,
-    View
-} from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface TextInputBarProps {
   onSend: (text: string) => void;
@@ -21,6 +17,7 @@ export function TextInputBar({
   placeholder = "Escribe un mensaje...",
 }: TextInputBarProps) {
   const [text, setText] = useState("");
+  const insets = useSafeAreaInsets();
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -31,7 +28,9 @@ export function TextInputBar({
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { paddingBottom: insets.bottom || spacing.md }]}
+    >
       <TextInput
         style={styles.input}
         value={text}

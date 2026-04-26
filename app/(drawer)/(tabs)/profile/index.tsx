@@ -130,11 +130,6 @@ export default function ProfileScreen() {
             onPress={() => router.push("/(drawer)/(tabs)/profile/settings")}
           />
           <View style={styles.divider} />
-          <SettingRow
-            icon="notifications-outline"
-            label="Notificaciones"
-            onPress={() => {}}
-          />
         </AppCard>
 
         <AppButton
