@@ -1,10 +1,11 @@
 import { AppCard } from "@/components/AppCard";
-import { colors, fontSize, fontWeight, spacing } from "@/constants/design";
 import {
-    formatCurrency,
-    getBuroScoreColor,
-    getBuroScoreLevel,
-} from "@/services/insightsService";
+    colors,
+    fontSize,
+    fontWeight,
+    radius,
+    spacing,
+} from "@/constants/design";
 import { FinancialInsight, INSIGHT_METADATA } from "@/types/insights";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
@@ -22,8 +23,6 @@ export function InsightCard({
   compact = false,
 }: InsightCardProps) {
   const metadata = INSIGHT_METADATA[insight.insight_type];
-  const scoreColor = getBuroScoreColor(insight.score_buro);
-  const scoreLevel = getBuroScoreLevel(insight.score_buro);
 
   return (
     <AppCard onPress={onPress} style={styles.card} animateIn>
@@ -41,58 +40,19 @@ export function InsightCard({
             color={metadata.color}
           />
         </View>
-        <View style={styles.headerText}>
-          <Text style={styles.insightTitle}>{metadata.title}</Text>
-        </View>
+        <Text style={styles.insightTitle}>{metadata.title}</Text>
       </View>
 
-      {/* Insight Text */}
+      {/* Mensaje */}
       <Text style={styles.insightText} numberOfLines={compact ? 3 : undefined}>
         {insight.insight_text}
       </Text>
 
-      {/* Metrics */}
-      {!compact && (
-        <View style={styles.metrics}>
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Score Buró</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={[styles.metricValue, { color: scoreColor }]}>
-                {insight.score_buro}
-              </Text>
-              <Text style={[styles.metricBadge, { color: scoreColor }]}>
-                {scoreLevel}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Gasto Anual</Text>
-            <Text style={styles.metricValue}>
-              {formatCurrency(insight.gasto_total_anual_mxn)}
-            </Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Uso de Crédito</Text>
-            <Text style={styles.metricValue}>
-              {insight.utilizacion_credito_pct.toFixed(1)}%
-            </Text>
-          </View>
-        </View>
-      )}
-
       {/* CTA */}
       {onPress && (
-        <View style={styles.cta}>
-          <Text style={[styles.ctaText, { color: metadata.color }]}>
-            Ver detalles
-          </Text>
-          <Ionicons name="arrow-forward" size={16} color={metadata.color} />
+        <View style={[styles.ctaButton, { backgroundColor: metadata.color }]}>
+          <Text style={styles.ctaLabel}>{metadata.cta_label}</Text>
+          <Ionicons name="arrow-forward" size={16} color="#fff" />
         </View>
       )}
     </AppCard>
@@ -116,73 +76,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerText: {
-    flex: 1,
-  },
-  segmentName: {
-    fontSize: fontSize.xs,
-    color: colors.muted,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    fontWeight: fontWeight.medium,
-  },
   insightTitle: {
+    flex: 1,
     fontSize: fontSize.md,
     fontWeight: fontWeight.semibold,
     color: colors.foreground,
-    marginTop: 2,
   },
   insightText: {
     fontSize: fontSize.md,
     lineHeight: 22,
     color: colors.foreground,
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
-  metrics: {
-    flexDirection: "row",
-    paddingVertical: spacing.md,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.sm,
-  },
-  metric: {
-    flex: 1,
-    alignItems: "center",
-  },
-  metricLabel: {
-    fontSize: fontSize.xs,
-    color: colors.muted,
-    marginBottom: 4,
-  },
-  metricValueRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  metricValue: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold,
-    color: colors.foreground,
-  },
-  metricBadge: {
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.medium,
-  },
-  divider: {
-    width: 1,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.sm,
-  },
-  cta: {
+  ctaButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.xs,
-    paddingTop: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
   },
-  ctaText: {
+  ctaLabel: {
     fontSize: fontSize.sm,
     fontWeight: fontWeight.semibold,
+    color: "#fff",
   },
 });

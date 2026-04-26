@@ -46,7 +46,7 @@ export default function InsightsScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8}>
           <Ionicons name="arrow-back" size={24} color={colors.foreground} />
         </Pressable>
-        <Text style={styles.title}>Insights Personalizados</Text>
+        <Text style={styles.title}>Para ti</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -55,46 +55,29 @@ export default function InsightsScreen() {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.foreground} />
             <Text style={styles.loadingText}>
-              Analizando tu perfil financiero...
+              Cargando tus recomendaciones...
             </Text>
           </View>
         ) : insights.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="analytics-outline" size={64} color={colors.muted} />
-            <Text style={styles.emptyTitle}>Sin insights disponibles</Text>
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={64}
+              color={colors.muted}
+            />
+            <Text style={styles.emptyTitle}>Todo al día</Text>
             <Text style={styles.emptyText}>
-              Tus insights personalizados aparecerán aquí cuando tengamos
-              suficiente información sobre tu actividad financiera.
+              Cuando detectemos oportunidades para mejorar tus finanzas, las
+              verás aquí.
             </Text>
           </View>
         ) : (
           <>
-            <Text style={styles.subtitle}>
-              Recomendaciones basadas en tu perfil:{" "}
-              <Text style={styles.segmentHighlight}>
-                {insights[0].segment_name}
-              </Text>
-            </Text>
-
             {insights.map((insight, index) => (
               <View key={index} style={styles.insightWrapper}>
                 <InsightCard insight={insight} />
               </View>
             ))}
-
-            <View style={styles.infoBox}>
-              <Ionicons
-                name="information-circle-outline"
-                size={20}
-                color={colors.muted}
-              />
-              <Text style={styles.infoText}>
-                Estos insights se generan automáticamente cuando detectamos
-                cambios relevantes en tu actividad financiera (cargos fallidos,
-                crédito al límite, inactividad, etc.) y se actualizan en tiempo
-                real.
-              </Text>
-            </View>
           </>
         )}
       </ScreenContainer>
@@ -119,16 +102,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold,
-    color: colors.foreground,
-  },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: colors.muted,
-    marginBottom: spacing.lg,
-    lineHeight: 22,
-  },
-  segmentHighlight: {
     fontWeight: fontWeight.bold,
     color: colors.foreground,
   },
@@ -166,21 +139,5 @@ const styles = StyleSheet.create({
     color: colors.muted,
     textAlign: "center",
     lineHeight: 22,
-  },
-  infoBox: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    backgroundColor: colors.inputBackground,
-    padding: spacing.md,
-    borderRadius: 12,
-    marginTop: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: fontSize.sm,
-    color: colors.muted,
-    lineHeight: 20,
   },
 });

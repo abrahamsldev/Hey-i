@@ -40,6 +40,24 @@ async function fetchFromLambda<T>(
   }
 }
 
+/**
+ * El Lambda retorna structuredContent en 3 posibles formatos:
+ *   1. Array de content blocks MCP:  [{ type: "text", text: "{...}" }]
+ *   2. String JSON directo:          "{\"ok\":true,...}"
+ *   3. Objeto ya parseado:           { ok: true, charts: [...] }
+ */
+function parseMCPContent(raw: unknown): any {
+  if (Array.isArray(raw)) {
+    const textBlock = raw.find((b: any) => b.type === "text");
+    const text = textBlock?.text ?? "{}";
+    return JSON.parse(text);
+  }
+  if (typeof raw === "string") {
+    return JSON.parse(raw);
+  }
+  return raw ?? {};
+}
+
 export async function getSpendingDashboard(
   accessToken: string,
 ): Promise<Dashboard> {
@@ -58,10 +76,7 @@ export async function getSpendingDashboard(
     JSON.stringify(data?.structuredContent)?.slice(0, 500),
   );
 
-  const content =
-    typeof data.structuredContent === "string"
-      ? JSON.parse(data.structuredContent)
-      : data.structuredContent;
+  const content = parseMCPContent(data?.structuredContent);
 
   console.log("[spending] content.ok:", content?.ok);
   console.log("[spending] content.charts length:", content?.charts?.length);
@@ -88,10 +103,7 @@ export async function getSavingsDashboard(
     JSON.stringify(data?.structuredContent)?.slice(0, 500),
   );
 
-  const content =
-    typeof data.structuredContent === "string"
-      ? JSON.parse(data.structuredContent)
-      : data.structuredContent;
+  const content = parseMCPContent(data?.structuredContent);
 
   console.log("[savings] content.ok:", content?.ok);
   console.log("[savings] content.charts length:", content?.charts?.length);

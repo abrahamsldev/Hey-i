@@ -191,12 +191,10 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tu resumen</Text>
           {loadingDashboards && (
-            <Text style={styles.loadingText}>Cargando dashboards...</Text>
+            <Text style={styles.loadingText}>Cargando tu resumen...</Text>
           )}
           {!loadingDashboards && widgets.length === 0 && (
-            <Text style={styles.loadingText}>
-              Aun no hay datos disponibles.
-            </Text>
+            <Text style={styles.loadingText}>Sin datos disponibles aún.</Text>
           )}
           {widgets.map((widget) => (
             <DashboardCard
@@ -213,7 +211,7 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            {primaryInsight ? "Explorar más" : "Tu resumen"}
+            {primaryInsight ? "Descubrir" : "Explorar"}
           </Text>
           {CARDS.map((card) => (
             <AppCard

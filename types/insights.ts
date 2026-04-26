@@ -42,6 +42,7 @@ export interface InsightMetadata {
   icon: string;
   color: string;
   category: "upsell" | "retention" | "loyalty" | "financial_health";
+  cta_label: string;
 }
 
 export const INSIGHT_METADATA: Record<InsightType, InsightMetadata> = {
@@ -51,6 +52,7 @@ export const INSIGHT_METADATA: Record<InsightType, InsightMetadata> = {
     icon: "trending-up",
     color: "#10b981",
     category: "upsell",
+    cta_label: "Invertir ahora",
   },
   upsell_digital: {
     type: "upsell_digital",
@@ -58,6 +60,7 @@ export const INSIGHT_METADATA: Record<InsightType, InsightMetadata> = {
     icon: "phone-portrait",
     color: "#3b82f6",
     category: "upsell",
+    cta_label: "Activar cashback",
   },
   upsell_business: {
     type: "upsell_business",
@@ -65,6 +68,7 @@ export const INSIGHT_METADATA: Record<InsightType, InsightMetadata> = {
     icon: "business",
     color: "#8b5cf6",
     category: "upsell",
+    cta_label: "Ver oferta",
   },
   retention_reactivation: {
     type: "retention_reactivation",
@@ -72,6 +76,7 @@ export const INSIGHT_METADATA: Record<InsightType, InsightMetadata> = {
     icon: "heart",
     color: "#f59e0b",
     category: "retention",
+    cta_label: "Explorar beneficios",
   },
   retention_churn_risk: {
     type: "retention_churn_risk",
@@ -79,6 +84,7 @@ export const INSIGHT_METADATA: Record<InsightType, InsightMetadata> = {
     icon: "warning",
     color: "#ef4444",
     category: "retention",
+    cta_label: "Ver opciones",
   },
   loyalty_payroll: {
     type: "loyalty_payroll",
@@ -86,6 +92,7 @@ export const INSIGHT_METADATA: Record<InsightType, InsightMetadata> = {
     icon: "wallet",
     color: "#06b6d4",
     category: "loyalty",
+    cta_label: "Activar beneficios",
   },
   financial_stress_relief: {
     type: "financial_stress_relief",
@@ -93,5 +100,6 @@ export const INSIGHT_METADATA: Record<InsightType, InsightMetadata> = {
     icon: "shield-checkmark",
     color: "#ec4899",
     category: "financial_health",
+    cta_label: "Pedir ayuda",
   },
 };
