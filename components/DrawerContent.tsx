@@ -23,6 +23,12 @@ export function DrawerContent(props: any) {
     props.navigation?.closeDrawer?.();
   };
 
+  const handleSimulator = () => {
+    Haptics.selectionAsync();
+    props.navigation?.navigate("simulator");
+    props.navigation?.closeDrawer?.();
+  };
+
   const handleSignOut = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert("Cerrar sesión", "¿Estás seguro que deseas cerrar sesión?", [
@@ -56,6 +62,11 @@ export function DrawerContent(props: any) {
       <Pressable style={styles.item} onPress={handleHome}>
         <Ionicons name="home-outline" size={22} color={colors.foreground} />
         <Text style={styles.itemLabel}>Home</Text>
+      </Pressable>
+
+      <Pressable style={styles.item} onPress={handleSimulator}>
+        <Ionicons name="flask-outline" size={22} color={colors.foreground} />
+        <Text style={styles.itemLabel}>Simulador</Text>
       </Pressable>
 
       <View style={styles.spacer} />

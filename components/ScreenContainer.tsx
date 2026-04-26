@@ -1,6 +1,6 @@
 import { colors, spacing } from "@/constants/design";
 import React from "react";
-import { RefreshControlProps, StyleSheet, View, ViewStyle } from "react-native";
+import { RefreshControl, StyleSheet, View, ViewStyle } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -9,7 +9,8 @@ interface ScreenContainerProps {
   style?: ViewStyle;
   scrollable?: boolean;
   padded?: boolean;
-  refreshControl?: React.ReactElement<RefreshControlProps>;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 }
 
 export function ScreenContainer({
@@ -17,7 +18,8 @@ export function ScreenContainer({
   style,
   scrollable = false,
   padded = true,
-  refreshControl,
+  refreshing,
+  onRefresh,
 }: ScreenContainerProps) {
   const insets = useSafeAreaInsets();
 
@@ -37,7 +39,15 @@ export function ScreenContainer({
         keyboardShouldPersistTaps="handled"
         enableOnAndroid
         extraScrollHeight={16}
-        refreshControl={refreshControl}
+        refreshControl={
+          onRefresh !== undefined ? (
+            <RefreshControl
+              refreshing={refreshing ?? false}
+              onRefresh={onRefresh}
+              tintColor={colors.foreground}
+            />
+          ) : undefined
+        }
       >
         {children}
       </KeyboardAwareScrollView>

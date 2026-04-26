@@ -14,6 +14,7 @@ export default function DrawerLayout() {
       }}
     >
       <Drawer.Screen name="(tabs)" options={{ title: "Home" }} />
+      <Drawer.Screen name="simulator" options={{ title: "Simulador" }} />
     </Drawer>
   );
 }

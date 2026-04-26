@@ -1,9 +1,6 @@
 import { AppCard } from "@/components/AppCard";
 import { AppHeader } from "@/components/AppHeader";
-import {
-  DashboardCard,
-  DonutMini,
-} from "@/components/dashboard";
+import { DashboardCard, DonutMini } from "@/components/dashboard";
 import { InsightCard } from "@/components/InsightCard";
 import { ScreenContainer } from "@/components/ScreenContainer";
 import { colors, fontSize, fontWeight, spacing } from "@/constants/design";
@@ -16,13 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const CARDS = [
   {
@@ -32,7 +23,6 @@ const CARDS = [
     icon: "cart-outline",
     route: "/(drawer)/(tabs)/home/purchase-recommendation",
   },
-
 ] as const;
 
 export default function HomeScreen() {
@@ -43,12 +33,14 @@ export default function HomeScreen() {
     null,
   );
   const [loadingInsight, setLoadingInsight] = useState(true);
-  const [spendingDashboard, setSpendingDashboard] =
-    useState<Dashboard | null>(null);
-  const [savingsDashboard, setSavingsDashboard] =
-    useState<Dashboard | null>(null);
-  const [loadingDashboards, setLoadingDashboards] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [spendingDashboard, setSpendingDashboard] = useState<Dashboard | null>(
+    null,
+  );
+  const [savingsDashboard, setSavingsDashboard] = useState<Dashboard | null>(
+    null,
+  );
+  const [loadingDashboards, setLoadingDashboards] = useState(true);
 
   const displayName =
     user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "usuario";
@@ -69,6 +61,7 @@ export default function HomeScreen() {
       console.error("Error cargando insight:", error);
     } finally {
       setLoadingInsight(false);
+      setRefreshing(false);
     }
   };
 
@@ -85,10 +78,10 @@ export default function HomeScreen() {
     }
   };
 
-  const onRefresh = async () => {
+  const handleRefresh = () => {
     setRefreshing(true);
-    await loadDashboards();
-    setRefreshing(false);
+    loadInsight();
+    loadDashboards();
   };
 
   const openDrawer = () => {
@@ -104,18 +97,15 @@ export default function HomeScreen() {
 
     const donutSeries = spendingDonut?.series?.[0]?.data ?? [];
     const donutTotal = Number(spendingDonut?.summary?.total_mxn ?? 0);
-    const donutTopCategory = String(
-      spendingDonut?.summary?.top_category ?? "",
-    );
+    const donutTopCategory = String(spendingDonut?.summary?.top_category ?? "");
 
     return [
       {
-       id: "financial-health",
-  title: "Salud financiera",
-  value: formatCurrency(donutTotal, "MXN", 0),
-  insight: `Principal gasto: ${donutTopCategory || "-"}`,
-        onPress: () =>
-          router.push("/(drawer)/(tabs)/home/financial-health"),
+        id: "financial-health",
+        title: "Salud financiera",
+        value: formatCurrency(donutTotal, "MXN", 0),
+        insight: `Principal gasto: ${donutTopCategory || "-"}`,
+        onPress: () => router.push("/(drawer)/(tabs)/home/financial-health"),
         meta: (
           <View style={styles.legend}>
             {donutSeries.map((item, index) => (
@@ -126,7 +116,10 @@ export default function HomeScreen() {
                 <View
                   style={[
                     styles.legendDot,
-                    { backgroundColor: DONUT_COLORS[index % DONUT_COLORS.length] },
+                    {
+                      backgroundColor:
+                        DONUT_COLORS[index % DONUT_COLORS.length],
+                    },
                   ]}
                 />
                 <Text style={styles.legendLabel} numberOfLines={1}>
@@ -161,18 +154,26 @@ export default function HomeScreen() {
             <Ionicons name="menu-outline" size={26} color={colors.foreground} />
           </Pressable>
         }
+        right={
+          <Pressable
+            onPress={loadInsight}
+            hitSlop={8}
+            disabled={loadingInsight}
+          >
+            <Ionicons
+              name="refresh-outline"
+              size={22}
+              color={loadingInsight ? colors.muted : colors.foreground}
+            />
+          </Pressable>
+        }
       />
       <ScreenContainer
         scrollable
         padded={false}
         style={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.foreground}
-          />
-        }
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       >
         {/* Insight Principal */}
         {!loadingInsight && primaryInsight && (
